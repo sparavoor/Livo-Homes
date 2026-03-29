@@ -10,13 +10,6 @@ import { INDIA_STATES, STATE_DISTRICTS } from '@/data/india-locations';
 import { applyPromoCodeAction } from '@/app/admin/promo/actions';
 import { createOrderAction } from './actions';
 
-// Extend Window interface for Razorpay
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
-}
-
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, subtotal: cartSubtotal, totalItems, clearCart } = useCart();
@@ -24,9 +17,6 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Razorpay Key: Check both public and server (if server is exposed, though it shouldn't be)
-  const RAZORPAY_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '';
-
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<{ code: string; discount_type: 'percentage' | 'fixed'; discount_value: number } | null>(null);
   const [promoError, setPromoError] = useState('');
@@ -60,17 +50,6 @@ export default function CheckoutPage() {
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [saveNewAddress, setSaveNewAddress] = useState(false);
   const [isEnteringNewAddress, setIsEnteringNewAddress] = useState(true);
-
-  // Load Razorpay Script
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.async = true;
-    document.body.appendChild(script);
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
 
   // Pre-fill form if profile is available
   useEffect(() => {
@@ -150,94 +129,12 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleRazorpayPayment = async () => {
-    try {
-      if (!RAZORPAY_KEY) {
-        throw new Error('Razorpay is not fully configured (Key missing on client). Please check environment variables.');
-      }
-
-      // 1. Create Razorpay order on server
-      const response = await fetch('/api/checkout/razorpay', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: total,
-          receipt: `rcpt_${Math.random().toString(36).substring(7)}`
-        })
-      });
-
-      const orderData = await response.json();
-      if (orderData.error) throw new Error(orderData.error);
-
-      // 2. Open Razorpay modal
-      const options = {
-        key: RAZORPAY_KEY,
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: 'Livo Homes',
-        description: 'Architectural Excellence Procurement',
-        order_id: orderData.id,
-        handler: async function (response: any) {
-          // 3. On success, create order using Server Action
-          try {
-            await saveAddressIfNeeded();
-            
-            await createOrderAction({
-              user_id: user?.id,
-              customer_name: formData.name,
-              customer_email: formData.email,
-              customer_phone: formData.phone,
-              shipping_address: `${formData.address}${formData.state ? ', ' + formData.state : ''}`,
-              city: formData.city,
-              pincode: formData.pincode,
-              total_amount: total,
-              promo_code: appliedPromo?.code,
-              discount_amount: discountAmount,
-              payment_method: 'online',
-              items: items
-            });
-            clearCart();
-            router.push('/checkout/success');
-          } catch (err: any) {
-             setError(err.message || 'Payment successful, but failed to save order details. Please contact support.');
-          }
-        },
-        prefill: {
-          name: formData.name,
-          email: formData.email,
-          contact: formData.phone
-        },
-        theme: {
-          color: '#1a1a1a' // Match premium brand color
-        }
-      };
-
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-      
-      rzp.on('payment.failed', function (response: any) {
-        setError(response.error.description || 'Payment failed. Please try again.');
-        setIsSubmitting(false);
-      });
-
-    } catch (err: any) {
-      setError(err.message || 'Failed to initialize payment.');
-      setIsSubmitting(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
 
-    // If Online Payment
-    if (formData.paymentMethod === 'online') {
-      await handleRazorpayPayment();
-      return;
-    }
-    
-    // If Cash on Delivery
+    // Only Cash on Delivery supported for now
     try {
       await saveAddressIfNeeded();
       
@@ -253,7 +150,7 @@ export default function CheckoutPage() {
         total_amount: total,
         promo_code: appliedPromo?.code,
         discount_amount: discountAmount,
-        payment_method: formData.paymentMethod,
+        payment_method: 'cod',
         items: items
       });
 
@@ -462,11 +359,11 @@ export default function CheckoutPage() {
                 Payment Method
               </h2>
               <div className="space-y-4">
-                <label className={`flex items-center gap-4 p-6 rounded-2xl border-2 cursor-pointer transition-all ${formData.paymentMethod === 'cod' ? 'border-brand-accent bg-brand-accent/5' : 'border-surface-container-high hover:border-outline-variant'}`}>
+                <label className="flex items-center gap-4 p-6 rounded-2xl border-2 border-brand-accent bg-brand-accent/5 transition-all">
                   <input 
                     type="radio" name="paymentMethod" value="cod" 
-                    checked={formData.paymentMethod === 'cod'} 
-                    onChange={handleChange}
+                    checked={true} 
+                    readOnly
                     className="w-5 h-5 accent-brand-accent"
                   />
                   <div>
