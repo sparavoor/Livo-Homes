@@ -1,0 +1,128 @@
+[
+  {
+    "id": "1",
+    "name": "Helios Matte Faucet",
+    "category": "Faucets",
+    "price": 800,
+    "description": "Architectural precision crafted from solid lead-free brass with a signature obsidian finish.",
+    "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuAONWuwQJOJYTNyMAB0VKqZiYXywkdFr21UjZGIzqMAy14d6wTdFebkUgClt1vv2GVcxbmayWsExvFzZOQfU3Lgdbr6flJcpIWRTpdBL5FIX1b1YFsnBqGYaEMh-w7LoE4xecOZAnafweBlkf0RGsN6ELfyZGbOasZWIo0-usrH29do0APVUVcyxP95xaYOLj79rDMRS8IlrhHgKS0khckun8ly-0okcucfDYCuX7lmfnVm6LdV5Y_I-80frukRGoW00oKDc4rphFU",
+    "stock": 20,
+    "isNew": true,
+    "isSignatureMasterpiece": true,
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuAONWuwQJOJYTNyMAB0VKqZiYXywkdFr21UjZGIzqMAy14d6wTdFebkUgClt1vv2GVcxbmayWsExvFzZOQfU3Lgdbr6flJcpIWRTpdBL5FIX1b1YFsnBqGYaEMh-w7LoE4xecOZAnafweBlkf0RGsN6ELfyZGbOasZWIo0-usrH29do0APVUVcyxP95xaYOLj79rDMRS8IlrhHgKS0khckun8ly-0okcucfDYCuX7lmfnVm6LdV5Y_I-80frukRGoW00oKDc4rphFU"
+    ],
+    "availability": "In Stock"
+  },
+  {
+    "id": "2",
+    "name": "Zenith Vessel Basin",
+    "category": "Wash Basin",
+    "price": 1250,
+    "description": "High-glaze fireclay sculpted into an ultra-slim profile for the contemporary vanity.",
+    "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuDvoLlh8-dlcA9l4fSwedEIkbBb97KDRN7NpPl_KnjHcgu5Rr1cna8bXiE-lpi9sIAJ_ULJ3Mby2UgPUXILHU8D6svI1xWNKFSBHnwNAJWgz_dceWdgHnGN2xXubrNg7vOxHG1s3G3sFYwmcuFvyJe58_YdODnWd3_OjnYMRhUf5AyFwd0B2_mAfaQI4gxd-22D4EpPXpkEm4lsOxEvmVLlWNOPHRsWpfIIKR0qwRAcK4nkIqgVytwTfseHEMGJuuqqx6zfvPr8cu8",
+    "stock": 8,
+    "isSignatureMasterpiece": true,
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDvoLlh8-dlcA9l4fSwedEIkbBb97KDRN7NpPl_KnjHcgu5Rr1cna8bXiE-lpi9sIAJ_ULJ3Mby2UgPUXILHU8D6svI1xWNKFSBHnwNAJWgz_dceWdgHnGN2xXubrNg7vOxHG1s3G3sFYwmcuFvyJe58_YdODnWd3_OjnYMRhUf5AyFwd0B2_mAfaQI4gxd-22D4EpPXpkEm4lsOxEvmVLlWNOPHRsWpfIIKR0qwRAcK4nkIqgVytwTfseHEMGJuuqqx6zfvPr8cu8"
+    ],
+    "availability": "In Stock"
+  },
+  {
+    "id": "3",
+    "name": "Rainfall Elite System",
+    "category": "Shower",
+    "price": 1850,
+    "originalPrice": 2100,
+    "description": "Integrated thermostatic control with a wide-span overhead rain experience.",
+    "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuCcUFnXA_UK7-IRBApNbHurSSVA3DzUkXOnYOCibjJTZgjVM76qGwnM8ccuuYGOko_DYxKLs8ZCObFOHoumwmUNSOx3huZQ0r7K9maykGhcDvw0JZlTx9a4E76enc5o8H-872YwSQZNQ6Q_QqQunfSW_dbIioukNabp3Y9TsFa1Z1TpyOimJEfYNSo0sdQEz77DKeGcaopJy5jr1lDer_Cd6j3NxhICdbjgB0FN9IRu8g2oCCw-nOiiBF7iujsRF91Nh0NBu0CODjQ",
+    "stock": 5,
+    "isBestseller": true,
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCcUFnXA_UK7-IRBApNbHurSSVA3DzUkXOnYOCibjJTZgjVM76qGwnM8ccuuYGOko_DYxKLs8ZCObFOHoumwmUNSOx3huZQ0r7K9maykGhcDvw0JZlTx9a4E76enc5o8H-872YwSQZNQ6Q_QqQunfSW_dbIioukNabp3Y9TsFa1Z1TpyOimJEfYNSo0sdQEz77DKeGcaopJy5jr1lDer_Cd6j3NxhICdbjgB0FN9IRu8g2oCCw-nOiiBF7iujsRF91Nh0NBu0CODjQ"
+    ],
+    "availability": "In Stock"
+  },
+  {
+    "name": "Anas",
+    "category": "Faucets",
+    "price": 1233,
+    "originalPrice": 2000,
+    "description": "kjhvkjfbjvk",
+    "image": "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=1000",
+    "stock": 12,
+    "isNew": true,
+    "id": "nue1fend6",
+    "images": [
+      "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=1000"
+    ],
+    "availability": "In Stock"
+  },
+  {
+    "name": "Test Member",
+    "category": "Faucets",
+    "price": 1234,
+    "description": "hhjkklngh",
+    "image": "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=800",
+    "stock": 12,
+    "isNew": true,
+    "id": "o88bf32ur",
+    "images": [
+      "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=800"
+    ],
+    "availability": "In Stock"
+  },
+  {
+    "name": "Titanium Shower Head",
+    "category": "Shower",
+    "price": 450,
+    "description": "Hand-finished aerospace grade titanium shower head with precision hydro-nozzles.",
+    "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuCcUFnXA_UK7-IRBApNbHurSSVA3DzUkXOnYOCibjJTZgjVM76qGwnM8ccuuYGOko_DYxKLs8ZCObFOHoumwmUNSOx3huZQ0r7K9maykGhcDvw0JZlTx9a4E76enc5o8H-872YwSQZNQ6Q_QqQunfSW_dbIioukNabp3Y9TsFa1Z1TpyOimJEfYNSo0sdQEz77DKeGcaopJy5jr1lDer_Cd6j3NxhICdbjgB0FN9IRu8g2oCCw-nOiiBF7iujsRF91Nh0NBu0CODjQ",
+    "stock": 10,
+    "isNew": true,
+    "id": "dglans81i",
+    "isSignatureMasterpiece": true,
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCcUFnXA_UK7-IRBApNbHurSSVA3DzUkXOnYOCibjJTZgjVM76qGwnM8ccuuYGOko_DYxKLs8ZCObFOHoumwmUNSOx3huZQ0r7K9maykGhcDvw0JZlTx9a4E76enc5o8H-872YwSQZNQ6Q_QqQunfSW_dbIioukNabp3Y9TsFa1Z1TpyOimJEfYNSo0sdQEz77DKeGcaopJy5jr1lDer_Cd6j3NxhICdbjgB0FN9IRu8g2oCCw-nOiiBF7iujsRF91Nh0NBu0CODjQ"
+    ],
+    "availability": "In Stock"
+  },
+  {
+    "name": "Mibile Cover",
+    "category": "PTMT",
+    "price": 200,
+    "description": "scskjgijbols",
+    "image": "/uploads/1774436759444-images.jpeg",
+    "images": [
+      "/uploads/1774436759444-images.jpeg"
+    ],
+    "stock": 4,
+    "isNew": true,
+    "isSignatureMasterpiece": false,
+    "material": "Plastic",
+    "color": "Black",
+    "size": "450x300",
+    "availability": "In Stock",
+    "id": "n1y2d7tay",
+    "createdAt": "2026-03-25T11:05:59.446Z"
+  },
+  {
+    "name": "Ijlan",
+    "category": "Closets",
+    "price": 8000,
+    "description": "knlk",
+    "image": "/uploads/1774534020168-images.jpeg",
+    "images": [
+      "/uploads/1774534020168-images.jpeg"
+    ],
+    "stock": 90,
+    "isNew": true,
+    "isSignatureMasterpiece": false,
+    "material": "Plastic",
+    "color": "Black",
+    "size": "450x300",
+    "availability": "In Stock",
+    "id": "ogneubkg3",
+    "createdAt": "2026-03-26T14:07:00.171Z"
+  }
+]

@@ -1,0 +1,175 @@
+'use client';
+
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
+
+export interface Profile {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  phone: string | null;
+  avatar_url: string | null;
+  is_admin: boolean;
+  privilege_tier: string;
+  updated_at: string;
+}
+
+interface AuthContextType {
+  user: User | null;
+  profile: Profile | null;
+  loading: boolean;
+  loginWithGoogle: () => Promise<void>;
+  logout: () => Promise<void>;
+  sendOtp: (phoneNumber: string) => Promise<void>;
+  verifyOtp: (phoneNumber: string, token: string) => Promise<void>;
+  refreshProfile: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // This is a "Row not found" which is normal if the profile trigger hasn't run yet
+          console.warn("Profile not found for user:", userId);
+        } else {
+          console.error("Error fetching profile:", error.message || error);
+          if (error.details) console.error("Details:", error.details);
+          if (error.hint) console.error("Hint:", error.hint);
+        }
+        return null;
+      }
+      return data as Profile;
+    } catch (error: any) {
+      console.error("Error in fetchProfile:", error.message || error);
+      return null;
+    }
+  };
+
+  const refreshProfileData = async () => {
+    if (user) {
+      const p = await fetchProfile(user.id);
+      setProfile(p);
+    }
+  };
+
+  useEffect(() => {
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
+    // Get initial session
+    supabase.auth.getSession().then(async ({ data: { session } }: { data: { session: Session | null } }) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        const p = await fetchProfile(currentUser.id);
+        setProfile(p);
+      }
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        const p = await fetchProfile(currentUser.id);
+        setProfile(p);
+      } else {
+        setProfile(null);
+      }
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const loginWithGoogle = async () => {
+    if (!supabase) throw new Error("Supabase is not configured. Check your .env.local file.");
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: typeof window !== 'undefined' ? window.location.origin : ''
+        }
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error signing in with Google:", error);
+      throw error;
+    }
+  };
+
+  const logout = async () => {
+    if (!supabase) return;
+    try {
+      await supabase.auth.signOut();
+      // Explicitly clear state to ensure UI updates immediately
+      setUser(null);
+      setProfile(null);
+    } catch (error) {
+      console.error("Error signing out:", error);
+      // Still clear state even if server-side signout fails
+      setUser(null);
+      setProfile(null);
+      throw error;
+    }
+  };
+
+  const sendOtp = async (phoneNumber: string) => {
+    if (!supabase) throw new Error("Supabase is not configured. Check your .env.local file.");
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: phoneNumber,
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      throw error;
+    }
+  };
+
+  const verifyOtp = async (phoneNumber: string, token: string) => {
+    if (!supabase) throw new Error("Supabase is not configured. Check your .env.local file.");
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        phone: phoneNumber,
+        token: token,
+        type: 'sms',
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      throw error;
+    }
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, profile, loading, loginWithGoogle, logout, sendOtp, verifyOtp, refreshProfile: refreshProfileData }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
