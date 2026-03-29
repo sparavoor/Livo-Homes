@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/auth-context';
-import { createOrder } from '@/lib/orders';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { INDIA_STATES, STATE_DISTRICTS } from '@/data/india-locations';
 import { applyPromoCodeAction } from '@/app/admin/promo/actions';
+import { createOrderAction } from './actions';
 
 // Extend Window interface for Razorpay
 declare global {
@@ -23,6 +23,10 @@ export default function CheckoutPage() {
   const { user, profile } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Razorpay Key: Check both public and server (if server is exposed, though it shouldn't be)
+  const RAZORPAY_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '';
+
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<{ code: string; discount_type: 'percentage' | 'fixed'; discount_value: number } | null>(null);
   const [promoError, setPromoError] = useState('');
@@ -148,6 +152,10 @@ export default function CheckoutPage() {
 
   const handleRazorpayPayment = async () => {
     try {
+      if (!RAZORPAY_KEY) {
+        throw new Error('Razorpay is not fully configured (Key missing on client). Please check environment variables.');
+      }
+
       // 1. Create Razorpay order on server
       const response = await fetch('/api/checkout/razorpay', {
         method: 'POST',
@@ -163,18 +171,18 @@ export default function CheckoutPage() {
 
       // 2. Open Razorpay modal
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '', // Needs to be public for client
+        key: RAZORPAY_KEY,
         amount: orderData.amount,
         currency: orderData.currency,
         name: 'Livo Homes',
         description: 'Architectural Excellence Procurement',
         order_id: orderData.id,
         handler: async function (response: any) {
-          // 3. On success, create order in Supabase
+          // 3. On success, create order using Server Action
           try {
             await saveAddressIfNeeded();
             
-            await createOrder({
+            await createOrderAction({
               user_id: user?.id,
               customer_name: formData.name,
               customer_email: formData.email,
@@ -191,7 +199,7 @@ export default function CheckoutPage() {
             clearCart();
             router.push('/checkout/success');
           } catch (err: any) {
-             setError('Payment successful, but failed to save order details. Please contact support.');
+             setError(err.message || 'Payment successful, but failed to save order details. Please contact support.');
           }
         },
         prefill: {
@@ -233,7 +241,7 @@ export default function CheckoutPage() {
     try {
       await saveAddressIfNeeded();
       
-      await createOrder({
+      await createOrderAction({
         user_id: user?.id,
         customer_name: formData.name,
         customer_email: formData.email,
