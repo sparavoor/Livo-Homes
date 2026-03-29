@@ -2,6 +2,8 @@ import { type NextRequest } from 'next/server'
 import { updateSession } from '@/utils/supabase/middleware'
 
 export default async function proxy(request: NextRequest) {
+  // Build ID: vercel-fix-v4-92cf8a7-retry
+  console.log('[PROX] Request for:', request.nextUrl.pathname);
   return await updateSession(request)
 }
 
