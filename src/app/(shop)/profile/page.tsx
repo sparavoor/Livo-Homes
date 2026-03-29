@@ -48,6 +48,7 @@ interface Order {
 export default function ProfilePage() {
   const { user, profile, loading, logout, refreshProfile } = useAuth();
   const router = useRouter();
+  const [hasMounted, setHasMounted] = useState(false);
   const [activeTab, setActiveTab] = useState('orders');
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   
@@ -56,6 +57,10 @@ export default function ProfilePage() {
   const [editPhone, setEditPhone] = useState('');
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [settingsMessage, setSettingsMessage] = useState({ type: '', text: '' });
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   // Data states
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -267,12 +272,15 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) {
+  if (!hasMounted || loading) {
     return (
       <div className="container mx-auto px-8 py-24 pt-32 flex justify-center items-center min-h-[60vh]">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="w-12 h-12 bg-surface-container-high rounded-full mb-4"></div>
-          <div className="h-4 bg-surface-container-high rounded w-24"></div>
+        <div className="animate-pulse flex flex-col items-center text-center">
+          <div className="w-16 h-16 bg-surface-container-high rounded-full mb-8 shadow-inner overflow-hidden flex items-center justify-center">
+             <div className="w-full h-full bg-gradient-to-br from-surface-container-high to-surface-container-low animate-pulse"></div>
+          </div>
+          <div className="h-4 bg-surface-container-high rounded-full w-48 mb-4"></div>
+          <div className="h-2 bg-surface-container-high rounded-full w-32 opacity-50"></div>
         </div>
       </div>
     );
