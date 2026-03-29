@@ -122,39 +122,49 @@ export async function saveProducts(products: Product[]): Promise<void> {
 
 export async function addProduct(product: Omit<Product, 'id' | 'createdAt'>): Promise<Product> {
   if (supabaseAdmin) {
-    const { data, error } = await supabaseAdmin
-      .from('products')
-      .insert({
-        name: product.name,
-        category: product.category,
-        price: product.price,
-        original_price: product.originalPrice,
-        description: product.description,
-        image: product.image,
-        images: product.images,
-        stock: product.stock,
-        is_new: product.isNew ?? true,
-        is_bestseller: product.isBestseller ?? false,
-        is_signature_masterpiece: product.isSignatureMasterpiece ?? false,
-        material: product.material,
-        color: product.color,
-        size: product.size,
-        availability: product.availability || (product.stock > 0 ? 'In Stock' : 'Sold Out'),
-      })
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('products')
+        .insert({
+          name: product.name,
+          category: product.category,
+          price: product.price,
+          original_price: product.originalPrice,
+          description: product.description,
+          image: product.image,
+          images: product.images,
+          stock: product.stock,
+          is_new: product.isNew ?? true,
+          is_bestseller: product.isBestseller ?? false,
+          is_signature_masterpiece: product.isSignatureMasterpiece ?? false,
+          material: product.material,
+          color: product.color,
+          size: product.size,
+          availability: product.availability || (product.stock > 0 ? 'In Stock' : 'Sold Out'),
+        })
+        .select()
+        .single();
 
-    if (error) throw error;
-    if (data) {
-      return {
-        ...product,
-        id: data.id,
-        createdAt: data.created_at,
-        isSignatureMasterpiece: data.is_signature_masterpiece,
-        availability: data.availability,
-      } as Product;
+      if (error) {
+        console.error('Supabase addProduct error:', error);
+        throw error;
+      }
+      
+      if (data) {
+        return {
+          ...product,
+          id: data.id,
+          createdAt: data.created_at,
+          isSignatureMasterpiece: data.is_signature_masterpiece,
+          availability: data.availability,
+        } as Product;
+      }
+    } catch (error) {
+      console.error('Failed to add product to Supabase:', error);
+      // Fallback to JSON below
     }
   }
+
 
   // Fallback to JSON
   const products = await getProducts();
@@ -303,33 +313,50 @@ export async function saveCategories(categories: Category[]): Promise<void> {
 
 export async function addCategory(category: Omit<Category, 'id' | 'count'>): Promise<Category> {
   if (supabaseAdmin) {
-    const id = category.name.toLowerCase().replace(/\s+/g, '-');
-    const { data, error } = await supabaseAdmin
-      .from('categories')
-      .insert({
-        id,
-        name: category.name,
-        image: category.image,
-        description: category.description,
-      })
-      .select()
-      .single();
+    // Generate a unique-ish slug based on the name
+    const timestamp = Date.now().toString(36).substr(-4);
+    const id = `${category.name.toLowerCase().replace(/\s+/g, '-')}-${timestamp}`;
+    
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('categories')
+        .insert({
+          id,
+          name: category.name,
+          image: category.image,
+          description: category.description,
+        })
+        .select()
+        .single();
 
-    if (error) {
-      console.error('Supabase addCategory error:', error);
-      if ((error as any).code === 'PGRST205') {
-        throw new Error('Supabase "categories" table not found. Please run the SQL migration in db_schema_update.sql.');
+      if (error) {
+        console.error('Supabase addCategory error:', error);
+        
+        // Specific handling for missing table error
+        if ((error as any).code === 'PGRST116' || (error as any).code === 'PGRST205' || (error as any).message?.includes('not found')) {
+          throw new Error('The "categories" table was not found in Supabase. Please run the SQL migration.');
+        }
+        
+        // Specific handling for RLS issues (though admin bypasses it)
+        if ((error as any).code === '42501') {
+          throw new Error('RLS Permission denied. Ensure your Service Role Key is correct.');
+        }
+
+        throw error;
       }
-      throw error;
-    }
-    if (data) {
-      return {
-        id: data.id,
-        name: data.name,
-        image: data.image,
-        description: data.description || '',
-        count: 0
-      };
+
+      if (data) {
+        return {
+          id: data.id,
+          name: data.name,
+          image: data.image,
+          description: data.description || '',
+          count: 0
+        };
+      }
+    } catch (dbError: any) {
+      console.error('Database insertion failed:', dbError.message);
+      // If DB fails, we still have the JSON fallback below
     }
   }
 
@@ -337,7 +364,7 @@ export async function addCategory(category: Omit<Category, 'id' | 'count'>): Pro
   const categories = await getCategories();
   const newCategory = {
     ...category,
-    id: category.name.toLowerCase().replace(/\s+/g, '-'),
+    id: category.name.toLowerCase().replace(/\s+/g, '-') + '-' + Math.random().toString(36).substr(2, 5),
     count: 0
   };
   categories.push(newCategory);
