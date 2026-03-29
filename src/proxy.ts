@@ -1,10 +1,20 @@
-import { type NextRequest } from 'next/server'
-import { updateSession } from '@/utils/supabase/middleware'
+import { type NextRequest, NextResponse } from 'next/server'
+import { updateSession } from './utils/supabase/middleware'
 
 export default async function proxy(request: NextRequest) {
   // Build ID: vercel-fix-v4-92cf8a7-retry
-  console.log('[PROX] Request for:', request.nextUrl.pathname);
-  return await updateSession(request)
+  const response = await updateSession(request)
+  
+  // If user is logged in, and tries to access login/register, redirect to home
+  // We can check if a session cookie exists as a simple heuristic in proxy
+  const hasSession = request.cookies.has('sb-livo-auth-token')
+  const isAuthPage = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register')
+  
+  if (hasSession && isAuthPage) {
+    return NextResponse.redirect(new URL('/', request.url))
+  }
+
+  return response
 }
 
 export const config = {
