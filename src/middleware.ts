@@ -1,17 +1,20 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from './utils/supabase/middleware'
 
-export default async function proxy(request: NextRequest) {
-  // Build ID: vercel-fix-v4-92cf8a7-retry
+export default async function middleware(request: NextRequest) {
+  // Update session handles refreshing the auth token and keeping it current
   const response = await updateSession(request)
   
-  // If user is logged in, and tries to access login/register, redirect to home
-  // Supabase cookie names vary by project, so we check for any cookie containing '-auth-token'
-  const hasSession = request.cookies.getAll().some(c => c.name.includes('auth-token'))
+  // Basic session heuristic to avoid flashes
+  const hasAuthCookie = request.cookies.getAll().some(c => c.name.includes('auth-token'))
   const isAuthPage = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register')
   
-  if (hasSession && isAuthPage) {
-    return NextResponse.redirect(new URL('/', request.url))
+  // If we have a session cookie and we are on an auth page, send to home
+  // But we only do this if it's a DIRECT access (not an internal redirect) to avoid loops
+  if (hasAuthCookie && isAuthPage) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/'
+    return NextResponse.redirect(url)
   }
 
   return response

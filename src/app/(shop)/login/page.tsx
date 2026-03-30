@@ -9,6 +9,7 @@ function LoginContent() {
   const { user, loginWithGoogle, sendOtp, verifyOtp } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [hasMounted, setHasMounted] = useState(false);
   const redirect = searchParams?.get('redirect') || '/';
   
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -18,10 +19,25 @@ function LoginContent() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (hasMounted && user) {
       router.push(redirect);
     }
-  }, [user, router, redirect]);
+  }, [user, router, redirect, hasMounted]);
+
+  if (!hasMounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-surface">
+        <div className="w-full max-w-md p-10 flex flex-col items-center">
+            <div className="w-12 h-12 border-2 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+            <p className="text-[10px] uppercase font-black tracking-[0.3em] text-secondary/40 animate-pulse">Establishing Connection...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleGoogleLogin = async () => {
     setError('');
