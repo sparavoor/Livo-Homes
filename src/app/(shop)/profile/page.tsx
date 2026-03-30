@@ -143,10 +143,12 @@ export default function ProfilePage() {
   };
 
   const fetchAddresses = async () => {
+    if (!user) return;
     try {
       const { data, error } = await supabase
         .from('addresses')
         .select('*')
+        .eq('profile_id', user.id)
         .order('is_default', { ascending: false });
       if (error) throw error;
       setAddresses(data || []);
@@ -309,9 +311,9 @@ export default function ProfilePage() {
   const userInitial = (displayProfile.full_name || 'U').charAt(0).toUpperCase();
 
   const navItems = [
-    { id: 'orders', label: 'My Orders', icon: 'shopping_bag' },
+    { id: 'orders', label: 'Order History', icon: 'history' },
     { id: 'wishlist', label: 'Wishlist', icon: 'favorite' },
-    { id: 'address', label: 'Addresses', icon: 'location_on' },
+    { id: 'address', label: 'Shipping Registry', icon: 'local_shipping' },
     // { id: 'payments', label: 'Saved Cards', icon: 'credit_card' }, // Hidden as per request
     { id: 'coupons', label: 'Coupons', icon: 'confirmation_number' },
     { id: 'settings', label: 'Account Settings', icon: 'settings' },
@@ -387,10 +389,10 @@ export default function ProfilePage() {
               
               {orders.length === 0 ? (
                 <div className="text-center py-32 bg-background rounded-xl border border-dashed border-outline/20">
-                  <span className="material-symbols-outlined text-6xl text-primary/10 mb-6 font-light">receipt_long</span>
+                  <span className="material-symbols-outlined text-6xl text-primary/10 mb-6 font-light">inventory_2</span>
                   <h3 className="text-xl font-headline font-black text-primary mb-2 tracking-tight">Archives are empty</h3>
                   <p className="text-secondary text-sm font-light mb-10 max-w-sm mx-auto">Your architectural journey begins with your first procurement. Explore our curation.</p>
-                  <Link href="/products" className="bg-primary text-white px-10 py-4 rounded-sm font-headline font-black text-[10px] uppercase tracking-[0.3em] hover:bg-brand-accent transition-all duration-700 shadow-2xl inline-block">Begin Selection</Link>
+                  <Link href="/shop" className="bg-primary text-white px-10 py-4 rounded-sm font-headline font-black text-[10px] uppercase tracking-[0.3em] hover:bg-brand-accent transition-all duration-700 shadow-2xl inline-block">Begin Selection</Link>
                 </div>
               ) : (
                 <div className="space-y-12">
@@ -564,7 +566,7 @@ export default function ProfilePage() {
                     <span className="text-brand-accent font-label text-[9px] font-black uppercase tracking-[0.4em]">Logistics</span>
                   </div>
                   <h2 className="text-4xl font-headline font-black text-primary tracking-tighter">
-                    Delivery <span className="font-serif italic text-secondary/40 font-light">Points.</span>
+                    Shipping <span className="font-serif italic text-secondary/40 font-light">Registry.</span>
                   </h2>
                 </div>
                 <button 
