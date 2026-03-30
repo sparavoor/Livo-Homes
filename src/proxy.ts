@@ -6,8 +6,8 @@ export default async function proxy(request: NextRequest) {
   const response = await updateSession(request)
   
   // If user is logged in, and tries to access login/register, redirect to home
-  // We can check if a session cookie exists as a simple heuristic in proxy
-  const hasSession = request.cookies.has('sb-livo-auth-token')
+  // Supabase cookie names vary by project, so we check for any cookie containing '-auth-token'
+  const hasSession = request.cookies.getAll().some(c => c.name.includes('auth-token'))
   const isAuthPage = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register')
   
   if (hasSession && isAuthPage) {

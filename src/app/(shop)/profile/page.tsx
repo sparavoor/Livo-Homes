@@ -40,6 +40,7 @@ interface Order {
   created_at: string;
   total_amount: number;
   status: string;
+  payment_method?: string;
   shipping_address?: string;
   city?: string;
   items?: OrderItem[];
@@ -471,14 +472,18 @@ export default function ProfilePage() {
                                     {order.city}, India
                                   </p>
                                 </div>
-                                <div className="space-y-4">
-                                  <p className="text-[8px] font-black text-secondary uppercase tracking-[0.4em]">Financial Status</p>
-                                  <div className="flex items-center gap-3">
-                                    <span className="material-symbols-outlined text-brand-accent text-sm">verified_user</span>
-                                    <p className="text-[10px] text-primary font-black uppercase tracking-[0.1em]">Settlement via Online Gateway</p>
+                                  <div className="space-y-4">
+                                    <p className="text-[8px] font-black text-secondary uppercase tracking-[0.4em]">Financial Status</p>
+                                    <div className="flex items-center gap-3">
+                                      <span className="material-symbols-outlined text-brand-accent text-sm">
+                                        {order.payment_method === 'cod' ? 'handshake' : 'verified_user'}
+                                      </span>
+                                      <p className="text-[10px] text-primary font-black uppercase tracking-[0.1em]">
+                                        {order.payment_method === 'cod' ? 'Settlement via Cash on Delivery' : 'Settlement via Online Portal'}
+                                      </p>
+                                    </div>
+                                    <p className="text-[9px] text-secondary/60">ID Tag: {order.id}</p>
                                   </div>
-                                  <p className="text-[9px] text-secondary/60">ID Tag: {order.id}</p>
-                                </div>
                             </div>
 
                             <div className="space-y-6">
