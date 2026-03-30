@@ -38,20 +38,10 @@ export default function ProductCard({
           </div>
         )}
 
-        <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
-          <div className="bg-white text-primary w-12 h-12 rounded-full shadow-2xl flex items-center justify-center transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-             <span className="material-symbols-outlined font-light text-xl">add_shopping_cart</span>
-          </div>
-        </div>
       </Link>
 
       <div className="p-6 flex flex-col flex-1">
-        <div className="flex justify-between items-start mb-2">
-          <p className="text-secondary text-[9px] uppercase font-bold tracking-[0.3em] font-label">{category}</p>
-          <button className="text-secondary/40 hover:text-brand-accent transition-colors">
-            <span className="material-symbols-outlined text-lg font-light">heart_plus</span>
-          </button>
-        </div>
+        <p className="text-secondary text-[9px] uppercase font-bold tracking-[0.3em] font-label mb-2">{category}</p>
         
         <h4 className="text-sm font-headline font-bold mb-4 flex-1 leading-tight tracking-tight">
           <Link href={`/products/${id}`} className="text-primary hover:text-brand-accent transition-colors duration-300">

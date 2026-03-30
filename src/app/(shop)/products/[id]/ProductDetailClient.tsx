@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Product } from '@/lib/db';
-import { useCart } from '@/context/CartContext';
 import { getWhatsAppLink, getProductInquiryMessage } from '@/lib/whatsapp';
 import MotionSection from '@/components/MotionSection';
 import MotionItem from '@/components/MotionItem';
@@ -16,33 +15,10 @@ interface ProductDetailClientProps {
 }
 
 export default function ProductDetailClient({ product, relatedProducts }: ProductDetailClientProps) {
-  const router = useRouter();
-  const { addItem } = useCart();
   const [activeImage, setActiveImage] = useState<string>(product.images?.[0] || product.image);
-  const [showToast, setShowToast] = useState(false);
-
-  const addToCart = () => {
-    addItem(product);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-  };
-
-  const buyNow = () => {
-    addItem(product);
-    router.push('/cart');
-  };
 
   return (
     <>
-      {/* Toast Notification */}
-      {showToast && (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] bg-primary text-white px-10 py-5 rounded-full shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] flex items-center gap-4 animate-in fade-in slide-in-from-top-10 duration-500 backdrop-blur-xl border border-white/10">
-          <div className="bg-green-500/20 p-1.5 rounded-full">
-            <span className="material-symbols-outlined text-green-400 text-sm">check</span>
-          </div>
-          <span className="text-[10px] font-black uppercase tracking-[0.2em]">Curated Item Added to Collection</span>
-        </div>
-      )}
 
       {/* Breadcrumbs */}
       <MotionSection>
@@ -123,40 +99,22 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${product.availability === 'In Stock' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
                 <span className={`font-black uppercase tracking-[0.2em] text-[10px] ${product.availability === 'In Stock' ? 'text-green-600' : 'text-error'}`}>
-                  {product.availability === 'In Stock' ? `${product.stock} Units Available` : 'Sold Out'}
+                  {product.availability === 'In Stock' ? `Available for Inquiry` : 'Out of Stock'}
                 </span>
               </div>
             </div>
           </MotionSection>
 
-          {/* Call to Action */}
           <MotionSection delay={0.5} className="space-y-6 pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <button 
-                onClick={addToCart}
-                disabled={product.availability === 'Sold Out'}
-                className={`w-full py-6 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-4 ${product.availability === 'Sold Out' ? 'bg-slate-100 text-slate-300 cursor-not-allowed' : 'bg-white text-primary border-2 border-slate-100 shadow-2xl shadow-slate-200/50 hover:bg-primary hover:text-white hover:border-primary active:scale-95'}`}
-              >
-                <span className="material-symbols-outlined text-xl">shopping_bag</span>
-                Add to Cart
-              </button>
-              <button 
-                onClick={buyNow}
-                disabled={product.availability === 'Sold Out'}
-                className={`w-full py-6 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-4 ${product.availability === 'Sold Out' ? 'bg-slate-100 text-slate-300 cursor-not-allowed' : 'bg-primary text-white shadow-[0_25px_50px_-12px_rgba(26,50,86,0.3)] hover:scale-[1.03] hover:-translate-y-1 active:scale-95'}`}
-              >
-                <span className="material-symbols-outlined text-xl">bolt</span>
-                Buy Now
-              </button>
-            </div>
             <Link 
               href={getWhatsAppLink(getProductInquiryMessage(product.name, product.price, product.id))}
               target="_blank"
-              className="w-full flex items-center justify-center space-x-4 border-2 border-primary/20 text-primary py-6 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-primary/5 hover:border-primary transition-all group"
+              className="w-full flex items-center justify-center space-x-6 bg-primary text-white py-8 rounded-2xl font-black text-[10px] uppercase tracking-[0.4em] shadow-[0_25px_50px_-12px_rgba(26,50,86,0.5)] hover:scale-[1.02] transition-all group"
             >
-              <span className="material-symbols-outlined text-xl group-hover:rotate-12 transition-transform">chat_bubble</span>
+              <span className="material-symbols-outlined text-2xl group-hover:rotate-12 transition-transform">chat_bubble</span>
               <span>Enquire Architectural Pricing</span>
             </Link>
+            <p className="text-center text-slate-400 text-[8px] font-black uppercase tracking-[0.3em]">Direct Concierge Assistance via WhatsApp</p>
           </MotionSection>
         </div>
       </div>

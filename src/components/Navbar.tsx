@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { useCart } from '@/context/CartContext';
-import { useAuth } from '@/context/auth-context';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar() {
@@ -12,8 +10,6 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const { totalItems } = useCart();
-  const { user } = useAuth();
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -57,34 +53,18 @@ export default function Navbar() {
               placeholder="Search aesthetics..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent border-none focus:ring-0 text-xs w-40 font-body text-primary placeholder:text-secondary/50 placeholder:font-light"
             />
           </form>
 
-          <div className="flex items-center space-x-2 md:space-x-4">
-            <Link href={user ? "/profile" : "/login"} className="p-2 text-primary dark:text-white hover:bg-surface-container-low rounded-full transition-all">
-              <span className="material-symbols-outlined text-2xl font-light">
-                {user ? 'account_circle' : 'person'}
-              </span>
-            </Link>
-            
-            <Link href="/cart" className="p-2 text-primary dark:text-white hover:bg-surface-container-low rounded-full transition-all relative">
-              <span className="material-symbols-outlined text-2xl font-light">shopping_cart</span>
-              {totalItems > 0 && (
-                <span className="absolute top-1 right-1 bg-brand-accent text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-black animate-in zoom-in duration-500 scale-110">
-                  {totalItems}
-                </span>
-              )}
-            </Link>
-
-            {/* Mobile Menu Toggle */}
+          <div className="lg:hidden flex items-center">
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 text-primary dark:text-white hover:bg-surface-container-low rounded-full transition-all"
+              className="p-2 text-primary dark:text-white hover:bg-surface-container-low rounded-full transition-all"
             >
               <span className="material-symbols-outlined text-2xl">{isMobileMenuOpen ? 'close' : 'menu'}</span>
             </button>
           </div>
+
         </div>
       </div>
 
@@ -114,11 +94,6 @@ export default function Navbar() {
                     className="bg-transparent border-none focus:ring-0 text-sm w-full font-body text-primary"
                   />
                 </form>
-                
-                <Link href={user ? "/profile" : "/login"} className="flex items-center gap-4 text-xs font-black text-primary">
-                  <span className="material-symbols-outlined font-light">person</span>
-                  {user ? 'My Profile' : 'Sign In'}
-                </Link>
               </div>
             </div>
           </motion.div>

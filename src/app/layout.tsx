@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 
 import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
-import { CartProvider } from "@/context/CartContext";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: 'swap' });
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: 'swap' });
@@ -25,9 +24,7 @@ export default function RootLayout({
       </head>
       <body className="bg-background font-body text-primary selection:bg-brand-accent selection:text-white min-h-screen antialiased">
         <AuthProvider>
-          <CartProvider>
             {children}
-          </CartProvider>
         </AuthProvider>
       </body>
     </html>
