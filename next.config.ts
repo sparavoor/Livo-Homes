@@ -9,7 +9,10 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'bathoutlet.in' },
       { protocol: 'https', hostname: 'd3hdqda5v86kzc.cloudfront.net' },
       { protocol: 'https', hostname: 'm.media-amazon.com' },
-      { protocol: 'https', hostname: 'lagogroup.in' },
+      { protocol: 'https', hostname: 'www.inart.co.in' },
+      { protocol: 'https', hostname: 'encrypted-tbn0.gstatic.com' },
+      { protocol: 'https', hostname: 'rukminim2.flixcart.com' },
+      { protocol: 'https', hostname: 'resasanitaryware.com' },
     ],
   },
 };

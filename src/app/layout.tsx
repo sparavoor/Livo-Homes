@@ -1,4 +1,5 @@
 import { AuthProvider } from '@/context/auth-context';
+import { CartProvider } from '@/context/CartContext';
 import type { Metadata } from "next";
 
 import { Inter, Manrope } from "next/font/google";
@@ -24,7 +25,9 @@ export default function RootLayout({
       </head>
       <body className="bg-background font-body text-primary selection:bg-brand-accent selection:text-white min-h-screen antialiased">
         <AuthProvider>
+          <CartProvider>
             {children}
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

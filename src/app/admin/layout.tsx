@@ -20,6 +20,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   
   const navLinks = [
     { name: 'Dashboard', path: '/admin', icon: 'dashboard' },
+    { name: 'Orders', path: '/admin/orders', icon: 'shopping_cart' },
+    { name: 'Customers', path: '/admin/customers', icon: 'group' },
     { name: 'Categories', path: '/admin/categories', icon: 'category' },
     { name: 'Products', path: '/admin/products', icon: 'inventory_2' },
     { name: 'Hero Banners', path: '/admin/banners', icon: 'view_carousel' },

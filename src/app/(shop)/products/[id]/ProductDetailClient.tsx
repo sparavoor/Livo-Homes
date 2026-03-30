@@ -8,6 +8,7 @@ import { getWhatsAppLink, getProductInquiryMessage } from '@/lib/whatsapp';
 import MotionSection from '@/components/MotionSection';
 import MotionItem from '@/components/MotionItem';
 import ProductCard from '@/components/ProductCard';
+import { useCart } from '@/context/CartContext';
 
 interface ProductDetailClientProps {
   product: Product;
@@ -16,6 +17,20 @@ interface ProductDetailClientProps {
 
 export default function ProductDetailClient({ product, relatedProducts }: ProductDetailClientProps) {
   const [activeImage, setActiveImage] = useState<string>(product.images?.[0] || product.image);
+  const { addItem } = useCart();
+  const router = useRouter();
+
+  const handleAddToCart = () => {
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      description: product.description
+    });
+    // Optional: redirect to cart or show success
+    // router.push('/cart');
+  };
 
   return (
     <>
@@ -106,14 +121,24 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
           </MotionSection>
 
           <MotionSection delay={0.5} className="space-y-6 pt-6">
-            <Link 
-              href={getWhatsAppLink(getProductInquiryMessage(product.name, product.price, product.id))}
-              target="_blank"
-              className="w-full flex items-center justify-center space-x-6 bg-primary text-white py-8 rounded-2xl font-black text-[10px] uppercase tracking-[0.4em] shadow-[0_25px_50px_-12px_rgba(26,50,86,0.5)] hover:scale-[1.02] transition-all group"
-            >
-              <span className="material-symbols-outlined text-2xl group-hover:rotate-12 transition-transform">chat_bubble</span>
-              <span>Enquire Architectural Pricing</span>
-            </Link>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <button 
+                onClick={handleAddToCart}
+                disabled={product.availability !== 'In Stock'}
+                className="w-full flex items-center justify-center space-x-4 bg-primary text-white py-6 rounded-2xl font-black text-[10px] uppercase tracking-[0.4em] shadow-xl hover:scale-[1.02] transition-all group disabled:opacity-30 disabled:scale-100"
+              >
+                <span className="material-symbols-outlined text-xl">add_shopping_cart</span>
+                <span>Select for Procurement</span>
+              </button>
+              <Link 
+                href={getWhatsAppLink(getProductInquiryMessage(product.name, product.price, product.id))}
+                target="_blank"
+                className="w-full flex items-center justify-center space-x-4 border-2 border-outline/10 text-primary py-6 rounded-2xl font-black text-[10px] uppercase tracking-[0.4em] hover:bg-surface-container-low transition-all group"
+              >
+                <span className="material-symbols-outlined text-xl">chat_bubble</span>
+                <span>Enquire via WhatsApp</span>
+              </Link>
+            </div>
             <p className="text-center text-slate-400 text-[8px] font-black uppercase tracking-[0.3em]">Direct Concierge Assistance via WhatsApp</p>
           </MotionSection>
         </div>
