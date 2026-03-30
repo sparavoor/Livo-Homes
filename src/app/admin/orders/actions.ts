@@ -1,10 +1,14 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getAllOrders, updateOrderStatus } from '@/lib/orders';
+import { getAllOrders, updateOrderStatus, getOrderItems, getDashboardStats } from '@/lib/orders';
 
-export async function fetchOrdersAction() {
-  return await getAllOrders();
+export async function fetchOrdersAction(page: number = 1) {
+  return await getAllOrders(page);
+}
+
+export async function fetchOrderItemsAction(orderId: string) {
+  return await getOrderItems(orderId);
 }
 
 export async function updateOrderStatusAction(orderId: string, status: string) {
@@ -20,21 +24,7 @@ export async function updateOrderStatusAction(orderId: string, status: string) {
 
 export async function fetchDashboardStatsAction() {
   try {
-    const orders = await getAllOrders();
-    const totalOrders = orders.length;
-    const totalRevenue = orders.reduce((sum: number, o: any) => sum + (o.total_amount || 0), 0);
-    const pendingOrders = orders.filter((o: any) => o.status === 'pending').length;
-    
-    // Get unique customers
-    const uniqueCustomers = new Set(orders.map((o: any) => o.customer_email || o.customer_phone)).size;
-
-    return {
-      totalOrders,
-      totalRevenue,
-      pendingOrders,
-      uniqueCustomers,
-      recentOrders: orders.slice(0, 5)
-    };
+    return await getDashboardStats();
   } catch (error) {
     console.error('Error fetching dashboard stats:', error);
     throw error;

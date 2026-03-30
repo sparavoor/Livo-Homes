@@ -20,6 +20,7 @@ interface CartContextType {
   clearCart: () => void;
   totalItems: number;
   subtotal: number;
+  loading: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -27,6 +28,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const isInitialMount = useRef(true);
   const prevUserRef = useRef(user);
 
@@ -56,6 +58,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         });
         
         setItems(mergedItems);
+        setLoading(false);
         localStorage.removeItem('livo_cart_guest');
         return;
       } catch (e) {
@@ -73,13 +76,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } else {
       setItems([]);
     }
+    setLoading(false);
   }, [storageKey, user]);
 
   // Handle logout: clear cart items when user logs out
   useEffect(() => {
     if (prevUserRef.current && !user) {
       setItems([]);
-      localStorage.removeItem('livo_cart_guest'); // Also clear guest cart for a fresh start
     }
     prevUserRef.current = user;
   }, [user]);
@@ -138,6 +141,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         clearCart,
         totalItems,
         subtotal,
+        loading,
       }}
     >
       {children}

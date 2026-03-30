@@ -12,7 +12,7 @@ import { createOrderAction } from './actions';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, subtotal: cartSubtotal, totalItems, clearCart } = useCart();
+  const { items, subtotal: cartSubtotal, totalItems, clearCart, loading: cartLoading } = useCart();
   const { user, profile } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +50,13 @@ export default function CheckoutPage() {
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [saveNewAddress, setSaveNewAddress] = useState(false);
   const [isEnteringNewAddress, setIsEnteringNewAddress] = useState(true);
+
+  // Handle redirect if cart is empty after loading
+  useEffect(() => {
+    if (!cartLoading && items.length === 0) {
+      router.push('/cart');
+    }
+  }, [cartLoading, items, router]);
 
   // Pre-fill form if profile is available
   useEffect(() => {
@@ -92,10 +99,11 @@ export default function CheckoutPage() {
     }
   }, [user]);
 
+  if (cartLoading) {
+    return <div className="min-h-screen flex items-center justify-center font-headline font-black uppercase tracking-[0.5em] text-primary/20">Establishing Procurement...</div>;
+  }
+
   if (items.length === 0) {
-    if (typeof window !== 'undefined') {
-       router.push('/cart');
-    }
     return null;
   }
 
@@ -429,9 +437,18 @@ export default function CheckoutPage() {
                   <span className="font-headline font-bold text-on-surface">₹{tax.toLocaleString()}</span>
                 </div>
 
-                <div className="pt-6 border-t border-outline-variant/10 flex justify-between items-baseline">
-                  <span className="font-headline text-[12px] font-black text-primary uppercase tracking-[0.4em]">Total Procurement</span>
-                  <span className="font-headline text-4xl font-black text-brand-accent tracking-tighter">₹{total.toLocaleString()}</span>
+                <div className="pt-6 border-t border-outline-variant/10">
+                  <div className="flex justify-between items-baseline mb-2">
+                    <span className="font-headline text-[12px] font-black text-primary uppercase tracking-[0.4em]">Total Procurement</span>
+                    <span className="font-headline text-4xl font-black text-brand-accent tracking-tighter">₹{total.toLocaleString()}</span>
+                  </div>
+                  {discountAmount > 0 && (
+                    <div className="flex justify-end">
+                      <span className="text-[10px] font-black text-green-600 uppercase tracking-widest bg-green-500/10 px-3 py-1 rounded-full animate-bounce mt-2">
+                        You saved ₹{discountAmount.toLocaleString()} on this architectural manifest
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 

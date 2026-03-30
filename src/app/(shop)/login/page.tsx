@@ -50,15 +50,32 @@ function LoginContent() {
     }
   };
 
-  const handleSendOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!phoneNumber) return;
+  const [resendTimer, setResendTimer] = useState(0);
+  
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
+
+  const handleSendOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!phoneNumber || phoneNumber.length < 10) {
+      showError('Please enter a valid 10-digit phone number.');
+      return;
+    }
+    
     setError('');
     setLoading(true);
     try {
       const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`;
       await sendOtp(formattedPhone);
       setIsOtpSent(true);
+      setResendTimer(60); // 60 seconds countdown
     } catch (err: any) {
       showError(err.message || 'Failed to send OTP. Ensure number is valid.');
     } finally {
@@ -68,42 +85,23 @@ function LoginContent() {
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!otp) return;
+    if (!otp || otp.length < 6) {
+      showError('Please enter the 6-digit passcode.');
+      return;
+    }
+    
     setError('');
     setLoading(true);
     try {
       const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`;
-      const { data, error } = await verifyOtp(formattedPhone, otp);
+      const { data, error: verifyError } = await verifyOtp(formattedPhone, otp);
       
-      if (error) throw error;
+      if (verifyError) throw verifyError;
+      if (!data?.user) throw new Error("Authentication succeeded but session validation failed.");
 
-      // If we don't have a user here yet, something is wrong
-      if (!data?.user) throw new Error("Authentication succeeded but no user data returned.");
-
-      // Check for profile and create if missing (Double protection for the trigger)
-      try {
-        const { data: profileCheck } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', data.user.id)
-          .single();
-
-        if (!profileCheck) {
-          console.log("Profile not found after login, creating manual entry...");
-          await supabase.from('profiles').upsert({
-            id: data.user.id,
-            full_name: 'Architectural Member',
-            phone: formattedPhone,
-            updated_at: new Date().toISOString()
-          });
-        }
-      } catch (profileErr) {
-        console.warn("Failed to ensure profile existence (non-critical):", profileErr);
-      }
-
-      // Success, the useEffect will handle the redirect
+      // Success - Redirect handled by user useEffect
     } catch (err: any) {
-      showError(err.message || 'Verification failed. Please try again.');
+      showError(err.message || 'The passcode entered is invalid or expired.');
     } finally {
       if (isMounted) setLoading(false);
     }
@@ -147,30 +145,32 @@ function LoginContent() {
         <form onSubmit={isOtpSent ? handleVerifyOtp : handleSendOtp} className="space-y-8">
           {!isOtpSent ? (
             <div className="space-y-4">
-              <label className="block font-black text-primary text-[8px] uppercase tracking-[0.4em]">Communication Channel</label>
+              <label className="block font-black text-primary text-[8px] uppercase tracking-[0.4em]">Communications Channel</label>
               <div className="group relative">
-                <span className="absolute left-6 top-1/2 -translate-y-1/2 text-secondary/40 text-xs font-bold">+91</span>
+                <div className="absolute left-6 top-1/2 -translate-y-1/2 flex items-center gap-2 border-r border-outline/10 pr-3 pointer-events-none">
+                  <span className="text-secondary/40 text-xs font-bold leading-none">+91</span>
+                </div>
                 <input 
                   type="tel" 
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  placeholder="XXXXXXXXXX" 
-                  className="w-full bg-background border border-outline/10 focus:border-brand-accent/40 outline-none rounded-sm pl-16 pr-6 py-5 text-sm font-headline font-bold transition-all placeholder:text-secondary/20" 
+                  placeholder="00000 00000" 
+                  className="w-full bg-background border border-outline/10 focus:border-brand-accent/40 outline-none rounded-sm pl-20 pr-6 py-5 text-sm font-headline font-bold transition-all placeholder:text-secondary/20" 
                   required
                 />
               </div>
-              <p className="text-[8px] text-secondary/40 uppercase tracking-[0.2em] px-1">Verification token will be transmitted via SMS.</p>
+              <p className="text-[8px] text-secondary/40 uppercase tracking-[0.2em] px-1">Identity verification will be transmitted via secure SMS.</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div className="flex justify-between items-center mb-2 px-1">
                 <label className="font-black text-primary text-[8px] uppercase tracking-[0.4em]">Passcode</label>
                 <button 
                   type="button" 
                   onClick={() => setIsOtpSent(false)}
-                  className="text-[8px] text-brand-accent font-black uppercase tracking-[0.2em] hover:underline"
+                  className="text-[8px] text-brand-accent font-black uppercase tracking-[0.2em] hover:opacity-70"
                 >
-                  Modify Number
+                  Return to Phone
                 </button>
               </div>
               <input 
@@ -178,11 +178,26 @@ function LoginContent() {
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="0 0 0 0 0 0" 
-                className="w-full bg-background border border-outline/10 focus:border-brand-accent/40 outline-none rounded-sm px-6 py-5 text-center text-lg tracking-[1em] font-black transition-all placeholder:opacity-10" 
+                className="w-full bg-background border border-outline/10 focus:border-brand-accent/40 outline-none rounded-sm px-6 py-5 text-center text-lg tracking-[1em] font-black transition-all placeholder:opacity-5" 
                 maxLength={6}
                 required
                 autoFocus
               />
+              <div className="text-center">
+                {resendTimer > 0 ? (
+                  <p className="text-[8px] text-secondary/30 uppercase tracking-[0.2em]">
+                    Resend available in <span className="text-primary tabular-nums font-black">{resendTimer}s</span>
+                  </p>
+                ) : (
+                  <button 
+                    type="button" 
+                    onClick={() => handleSendOtp()}
+                    className="text-[8px] text-brand-accent font-black uppercase tracking-[0.2em] hover:underline"
+                  >
+                    Resend Identity Token
+                  </button>
+                )}
+              </div>
             </div>
           )}
           

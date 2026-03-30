@@ -44,6 +44,8 @@ interface Order {
   shipping_address?: string;
   city?: string;
   items?: OrderItem[];
+  promo_code?: string;
+  discount_amount?: number;
 }
 
 export default function ProfilePage() {
@@ -79,6 +81,9 @@ export default function ProfilePage() {
     country: 'India'
   });
   const [promoCodes, setPromoCodes] = useState<any[]>([]);
+  const [fetchingOrders, setFetchingOrders] = useState(false);
+  const [fetchingAddresses, setFetchingAddresses] = useState(false);
+  const [fetchingCoupons, setFetchingCoupons] = useState(false);
 
   useEffect(() => {
     if (isMounted && !authLoading && !user) {
@@ -105,6 +110,7 @@ export default function ProfilePage() {
   }, [user, activeTab, isMounted]);
 
   const fetchPromoCodes = async () => {
+    setFetchingCoupons(true);
     try {
       const allPromos = await fetchPromoCodesAction();
       if (!allPromos) {
@@ -130,6 +136,8 @@ export default function ProfilePage() {
     } catch (error: any) {
       console.warn("Error fetching promo codes (table might be missing):", error.message);
       setPromoCodes([]);
+    } finally {
+      setFetchingCoupons(false);
     }
   };
 
@@ -144,6 +152,7 @@ export default function ProfilePage() {
 
   const fetchAddresses = async () => {
     if (!user) return;
+    setFetchingAddresses(true);
     try {
       const { data, error } = await supabase
         .from('addresses')
@@ -154,11 +163,14 @@ export default function ProfilePage() {
       setAddresses(data || []);
     } catch (error) {
       console.error("Error fetching addresses:", error);
+    } finally {
+      setFetchingAddresses(false);
     }
   };
 
   const fetchOrders = async () => {
     if (!user) return;
+    setFetchingOrders(true);
     try {
       const { data, error } = await supabase
         .from('orders')
@@ -172,6 +184,8 @@ export default function ProfilePage() {
       setOrders(data || []);
     } catch (error) {
       console.error("Error fetching orders:", error);
+    } finally {
+      setFetchingOrders(false);
     }
   };
 
@@ -387,7 +401,12 @@ export default function ProfilePage() {
                 Order <span className="font-serif italic text-secondary/40 font-light">History.</span>
               </h2>
               
-              {orders.length === 0 ? (
+              {fetchingOrders ? (
+                <div className="text-center py-32">
+                  <div className="w-10 h-10 border-4 border-primary/10 border-t-brand-accent rounded-full animate-spin mx-auto mb-6"></div>
+                  <p className="text-[10px] text-secondary/40 font-black uppercase tracking-[0.4em]">Retrieving Manifests...</p>
+                </div>
+              ) : orders.length === 0 ? (
                 <div className="text-center py-32 bg-background rounded-xl border border-dashed border-outline/20">
                   <span className="material-symbols-outlined text-6xl text-primary/10 mb-6 font-light">inventory_2</span>
                   <h3 className="text-xl font-headline font-black text-primary mb-2 tracking-tight">Archives are empty</h3>
@@ -494,7 +513,19 @@ export default function ProfilePage() {
                                         {order.payment_method === 'cod' ? 'Settlement via Cash on Delivery' : 'Settlement via Online Portal'}
                                       </p>
                                     </div>
-                                    <p className="text-[9px] text-secondary/60">ID Tag: {order.id}</p>
+                                    <div className="pt-2 space-y-1">
+                                      <div className="flex justify-between text-[10px] font-bold text-secondary uppercase tracking-tight">
+                                        <span>Order Valuation:</span>
+                                        <span>₹{order.total_amount.toLocaleString()}</span>
+                                      </div>
+                                      {order.discount_amount && order.discount_amount > 0 && (
+                                        <div className="flex justify-between text-[10px] font-black text-green-600 uppercase tracking-tight">
+                                          <span>Privilege Discount ({order.promo_code}):</span>
+                                          <span>- ₹{order.discount_amount.toLocaleString()}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                    <p className="text-[9px] text-secondary/60 pt-2 border-t border-outline/5">ID Tag: {order.id}</p>
                                   </div>
                             </div>
 
@@ -631,7 +662,12 @@ export default function ProfilePage() {
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {addresses.length === 0 && !isAddingAddress && (
+                {fetchingAddresses ? (
+                  <div className="col-span-2 text-center py-24">
+                    <div className="w-10 h-10 border-4 border-primary/10 border-t-brand-accent rounded-full animate-spin mx-auto mb-6"></div>
+                    <p className="text-[10px] text-secondary/40 font-black uppercase tracking-[0.4em]">Locating Entry Points...</p>
+                  </div>
+                ) : addresses.length === 0 && !isAddingAddress && (
                   <div className="col-span-2 text-center py-24 bg-background rounded-xl border border-dashed border-outline/20">
                     <span className="material-symbols-outlined text-5xl mb-6 text-primary/10 font-light">location_off</span>
                     <p className="text-secondary font-headline font-bold uppercase tracking-[0.2em] text-[10px]">No delivery points registered.</p>
@@ -664,7 +700,12 @@ export default function ProfilePage() {
                 Privilege <span className="font-serif italic text-secondary/40 font-light">Vouchers.</span>
               </h2>
               
-              {promoCodes.length === 0 ? (
+              {fetchingCoupons ? (
+                <div className="text-center py-32">
+                  <div className="w-10 h-10 border-4 border-primary/10 border-t-brand-accent rounded-full animate-spin mx-auto mb-6"></div>
+                  <p className="text-[10px] text-secondary/40 font-black uppercase tracking-[0.4em]">Analyzing Privileges...</p>
+                </div>
+              ) : promoCodes.length === 0 ? (
                 <div className="text-center py-32 bg-background rounded-xl border border-dashed border-outline/20">
                   <span className="material-symbols-outlined text-6xl text-primary/10 mb-6 font-light">confirmation_number</span>
                   <h3 className="text-xl font-headline font-black text-primary mb-2 tracking-tight">Tier Privileges Pending</h3>

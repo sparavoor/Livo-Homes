@@ -99,21 +99,41 @@ export async function getUserOrders(userId: string) {
   return data;
 }
 
-// Admin function to fetch all orders - uses supabaseAdmin to bypass RLS
-export async function getAllOrders() {
+// Admin function to fetch orders with pagination - uses supabaseAdmin to bypass RLS
+export async function getAllOrders(page: number = 1, limit: number = 20) {
+  const client = supabaseAdmin || supabase;
+  if (!client) return [];
+
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  // We fetch without order_items for the list view to maintain performance
+  const { data, error } = await client
+    .from('orders')
+    .select(`*`)
+    .order('created_at', { ascending: false })
+    .range(from, to);
+
+  if (error) {
+    console.error('Error fetching all orders:', error);
+    return [];
+  }
+
+  return data;
+}
+
+// Fetch order items only when needed (Lazy Loading)
+export async function getOrderItems(orderId: string) {
   const client = supabaseAdmin || supabase;
   if (!client) return [];
 
   const { data, error } = await client
-    .from('orders')
-    .select(`
-      *,
-      order_items (*)
-    `)
-    .order('created_at', { ascending: false });
+    .from('order_items')
+    .select('*')
+    .eq('order_id', orderId);
 
   if (error) {
-    console.error('Error fetching all orders:', error);
+    console.error('Error fetching order items:', error);
     return [];
   }
 
@@ -138,4 +158,37 @@ export async function updateOrderStatus(orderId: string, status: string) {
   }
 
   return data;
+}
+
+export async function getDashboardStats() {
+  const client = (supabaseAdmin as any) || (supabase as any);
+  if (!client) throw new Error('Supabase not initialized');
+
+  const { data: summary, error: rpcError } = await client
+    .rpc('get_dashboard_summary');
+
+  if (rpcError) {
+    console.error('Error from get_dashboard_summary RPC:', rpcError);
+    return {
+      totalOrders: 0,
+      totalRevenue: 0,
+      pendingOrders: 0,
+      uniqueCustomers: 0,
+      recentOrders: []
+    };
+  }
+
+  const { data: recent, error: recentError } = await client
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  return {
+    totalOrders: summary?.total_orders || 0,
+    totalRevenue: summary?.total_revenue || 0,
+    pendingOrders: summary?.pending_orders || 0,
+    uniqueCustomers: summary?.unique_customers || 0,
+    recentOrders: recent || []
+  };
 }

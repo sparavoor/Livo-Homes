@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { fetchOrdersAction, updateOrderStatusAction } from './actions';
+import { fetchOrdersAction, updateOrderStatusAction, fetchOrderItemsAction } from './actions';
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -9,6 +9,8 @@ export default function AdminOrders() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All Statuses');
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
+  const [orderItemsMap, setOrderItemsMap] = useState<Record<string, any[]>>({});
+  const [isDetailLoading, setIsDetailLoading] = useState<Record<string, boolean>>({});
 
   const statuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
   
@@ -70,6 +72,28 @@ export default function AdminOrders() {
       default: return 'bg-gray-100 text-gray-700';
     }
   };
+
+  async function toggleOrderExpansion(orderId: string) {
+    if (expandedOrderId === orderId) {
+      setExpandedOrderId(null);
+      return;
+    }
+
+    setExpandedOrderId(orderId);
+    
+    // Lazy load items if not already loaded
+    if (!orderItemsMap[orderId]) {
+      setIsDetailLoading(prev => ({ ...prev, [orderId]: true }));
+      try {
+        const items = await fetchOrderItemsAction(orderId);
+        setOrderItemsMap(prev => ({ ...prev, [orderId]: items }));
+      } catch (error) {
+        console.error('Failed to fetch items:', error);
+      } finally {
+        setIsDetailLoading(prev => ({ ...prev, [orderId]: false }));
+      }
+    }
+  }
 
   return (
     <div className="flex flex-col gap-8 font-body">
@@ -167,7 +191,7 @@ export default function AdminOrders() {
                     </td>
                     <td className="p-6 text-right space-x-4">
                       <button 
-                        onClick={() => setExpandedOrderId(expandedOrderId === order.id ? null : order.id)}
+                        onClick={() => toggleOrderExpansion(order.id)}
                         className="text-primary font-bold text-[10px] uppercase tracking-widest hover:text-brand-accent transition-colors"
                       >
                         {expandedOrderId === order.id ? 'Hide' : 'Details'}
@@ -202,7 +226,9 @@ export default function AdminOrders() {
                           <div className="lg:col-span-2 space-y-4">
                             <h4 className="text-[10px] font-black text-secondary uppercase tracking-widest border-b border-outline-variant/30 pb-2">Itemized Manifest</h4>
                             <div className="space-y-3">
-                              {order.order_items?.map((item: any) => (
+                              {isDetailLoading[order.id] ? (
+                                <div className="p-4 text-center text-xs font-bold text-secondary animate-pulse uppercase tracking-widest">Retrieving Manifest...</div>
+                              ) : (orderItemsMap[order.id] || []).map((item: any) => (
                                 <div key={item.id} className="flex justify-between items-center bg-white/50 p-4 rounded-xl border border-outline-variant/10">
                                   <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 bg-surface-container-high rounded-lg flex items-center justify-center text-[10px] font-black text-outline-variant italic">LIVO</div>

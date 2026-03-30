@@ -61,12 +61,20 @@ export interface Category {
 }
 
 // Products
-export async function getProducts(): Promise<Product[]> {
+export async function getProducts(page: number = 1, limit?: number): Promise<Product[]> {
   try {
     if (supabaseAdmin) {
-      const { data, error } = await supabaseAdmin
+      let query = supabaseAdmin
         .from('products')
-        .select('*')
+        .select('*');
+        
+      if (typeof limit === 'number') {
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
+        query = query.range(from, to);
+      }
+      
+      const { data, error } = await query
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -265,9 +273,13 @@ export async function getCategories(): Promise<Category[]> {
     let categories: Category[] = [];
 
     if (supabaseAdmin) {
+      // Use SQL to get counts more efficiently
       const { data, error } = await supabaseAdmin
         .from('categories')
-        .select('*')
+        .select(`
+          *,
+          products (count)
+        `)
         .order('name', { ascending: true });
 
       if (error) throw error;
@@ -278,7 +290,7 @@ export async function getCategories(): Promise<Category[]> {
           name: c.name,
           image: c.image,
           description: c.description || '',
-          count: 0 // Will be calculated below
+          count: c.products?.[0]?.count || 0
         }));
       }
     }
@@ -290,12 +302,7 @@ export async function getCategories(): Promise<Category[]> {
       categories = JSON.parse(data);
     }
     
-    // Dynamically calculate counts independently of where we got categories from
-    const products = await getProducts();
-    return categories.map(cat => ({
-      ...cat,
-      count: products.filter(p => p.category === cat.name).length
-    }));
+    return categories;
   } catch (error) {
     console.error('Error reading categories:', error);
     return [];

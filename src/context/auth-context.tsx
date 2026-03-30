@@ -21,8 +21,8 @@ interface AuthContextType {
   loading: boolean;
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
-  sendOtp: (phoneNumber: string) => Promise<void>;
-  verifyOtp: (phoneNumber: string, token: string) => Promise<any>;
+  sendOtp: (phone: string) => Promise<void>;
+  verifyOtp: (phone: string, token: string) => Promise<any>;
   refreshProfile: () => Promise<void>;
 }
 
@@ -81,40 +81,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const currentUser = session?.user ?? null;
         setUser(currentUser);
         
+        // Immediately set loading to false once we have a user/no-user result
+        // Profile can load in the background
+        setLoading(false);
+
         if (currentUser) {
           console.log("AuthContext: Initial session found for user:", currentUser.id);
           const p = await fetchProfile(currentUser.id);
           setProfile(p);
         } else {
-          console.log("AuthContext: No initial session found.");
           setProfile(null);
         }
       } catch (err: any) {
         console.error("AuthContext: Error checking initial session:", err.message);
-      } finally {
         setLoading(false);
       }
     };
 
     checkSession();
 
-    // Safety timeout for loading state
+    // Safety timeout for loading state - reduced to 3s for better UX
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 5000);
+    }, 3000);
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {
       console.log("AuthContext: Auth State Change Event:", _event);
       const currentUser = session?.user ?? null;
+      
+      // Update states
       setUser(currentUser);
+      setLoading(false); // Set false as soon as we get an event
+
       if (currentUser) {
         const p = await fetchProfile(currentUser.id);
         setProfile(p);
       } else {
         setProfile(null);
       }
-      setLoading(false);
     });
 
     return () => {
@@ -170,11 +175,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const sendOtp = async (phoneNumber: string) => {
+  const sendOtp = async (phone: string) => {
     if (!supabase) throw new Error("Supabase is not configured. Check your .env.local file.");
     try {
       const { error } = await supabase.auth.signInWithOtp({
-        phone: phoneNumber,
+        phone: phone,
       });
       if (error) throw error;
     } catch (error) {
@@ -183,19 +188,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const verifyOtp = async (phoneNumber: string, token: string) => {
+  const verifyOtp = async (phone: string, token: string) => {
     if (!supabase) throw new Error("Supabase is not configured. Check your .env.local file.");
     try {
       const { data, error } = await supabase.auth.verifyOtp({
-        phone: phoneNumber,
+        phone: phone,
         token: token,
         type: 'sms',
       });
-      if (error) throw error;
       return { data, error };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error verifying OTP:", error);
-      throw error;
+      return { data: null, error };
     }
   };
 
