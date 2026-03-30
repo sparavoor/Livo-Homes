@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/lib/supabase';
 
 function RegisterContent() {
   const { user, loginWithGoogle, sendOtp, verifyOtp } = useAuth();
@@ -70,7 +71,31 @@ function RegisterContent() {
     setLoading(true);
     try {
       const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`;
-      await verifyOtp(formattedPhone, otp);
+      const { data, error: verifyError } = await verifyOtp(formattedPhone, otp);
+      
+      if (verifyError) throw verifyError;
+
+      // Ensure profile exists
+      if (data?.user && supabase) {
+        try {
+          const { data: profileCheck } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('id', data.user.id)
+            .single();
+
+          if (!profileCheck) {
+             await supabase.from('profiles').upsert({
+              id: data.user.id,
+              full_name: 'Architectural Member',
+              phone: formattedPhone,
+              updated_at: new Date().toISOString()
+            });
+          }
+        } catch (pErr) {
+          console.warn("Manual profile creation failed (non-critical):", pErr);
+        }
+      }
     } catch (err: any) {
       showError(err.message || 'Verification failed. Please try again.');
     } finally {
@@ -199,7 +224,7 @@ function RegisterContent() {
 
 export default function RegisterPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Initialising Registry...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background">Initialising Registry...</div>}>
       <RegisterContent />
     </Suspense>
   );

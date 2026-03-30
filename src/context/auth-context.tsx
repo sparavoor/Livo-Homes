@@ -22,7 +22,7 @@ interface AuthContextType {
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   sendOtp: (phoneNumber: string) => Promise<void>;
-  verifyOtp: (phoneNumber: string, token: string) => Promise<void>;
+  verifyOtp: (phoneNumber: string, token: string) => Promise<any>;
   refreshProfile: () => Promise<void>;
 }
 
@@ -145,12 +145,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const verifyOtp = async (phoneNumber: string, token: string) => {
     if (!supabase) throw new Error("Supabase is not configured. Check your .env.local file.");
     try {
-      const { error } = await supabase.auth.verifyOtp({
+      const { data, error } = await supabase.auth.verifyOtp({
         phone: phoneNumber,
         token: token,
         type: 'sms',
       });
       if (error) throw error;
+      return { data, error };
     } catch (error) {
       console.error("Error verifying OTP:", error);
       throw error;

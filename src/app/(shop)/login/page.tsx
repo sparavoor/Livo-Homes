@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/lib/supabase';
 
 function LoginContent() {
   const { user, loginWithGoogle, sendOtp, verifyOtp } = useAuth();
@@ -72,7 +73,35 @@ function LoginContent() {
     setLoading(true);
     try {
       const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`;
-      await verifyOtp(formattedPhone, otp);
+      const { data, error } = await verifyOtp(formattedPhone, otp);
+      
+      if (error) throw error;
+
+      // If we don't have a user here yet, something is wrong
+      if (!data?.user) throw new Error("Authentication succeeded but no user data returned.");
+
+      // Check for profile and create if missing (Double protection for the trigger)
+      try {
+        const { data: profileCheck } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', data.user.id)
+          .single();
+
+        if (!profileCheck) {
+          console.log("Profile not found after login, creating manual entry...");
+          await supabase.from('profiles').upsert({
+            id: data.user.id,
+            full_name: 'Architectural Member',
+            phone: formattedPhone,
+            updated_at: new Date().toISOString()
+          });
+        }
+      } catch (profileErr) {
+        console.warn("Failed to ensure profile existence (non-critical):", profileErr);
+      }
+
+      // Success, the useEffect will handle the redirect
     } catch (err: any) {
       showError(err.message || 'Verification failed. Please try again.');
     } finally {
