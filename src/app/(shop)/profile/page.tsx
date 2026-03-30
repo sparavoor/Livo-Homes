@@ -273,10 +273,12 @@ export default function ProfilePage() {
 
   const handleLogout = async () => {
     try {
+      console.log("ProfilePage: Initiating logout sequence...");
       await logout();
-      window.location.href = '/login';
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error("ProfilePage: Logout failed:", error);
+    } finally {
+      // Hard redirect to login page ensuring No session leftover data is visible
       window.location.href = '/login';
     }
   };

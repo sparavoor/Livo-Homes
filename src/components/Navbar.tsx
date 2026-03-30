@@ -13,7 +13,7 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const { totalItems } = useCart();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -62,25 +62,11 @@ export default function Navbar() {
           </form>
 
           <div className="flex items-center space-x-2 md:space-x-4">
-            <div className="flex items-center gap-1">
-              <Link href={user ? "/profile" : "/login"} className="p-2 text-primary dark:text-white hover:bg-surface-container-low rounded-full transition-all" title="Profile Manifest">
-                <span className="material-symbols-outlined text-2xl font-light">
-                  {user ? 'account_circle' : 'person'}
-                </span>
-              </Link>
-              {user && (
-                <button 
-                  onClick={async () => {
-                    await logout();
-                    window.location.href = '/login';
-                  }}
-                  className="p-2 text-error hover:bg-error/5 rounded-full transition-all"
-                  title="Sign Out"
-                >
-                  <span className="material-symbols-outlined text-2xl font-light">logout</span>
-                </button>
-              )}
-            </div>
+            <Link href={user ? "/profile" : "/login"} className="p-2 text-primary dark:text-white hover:bg-surface-container-low rounded-full transition-all">
+              <span className="material-symbols-outlined text-2xl font-light">
+                {user ? 'account_circle' : 'person'}
+              </span>
+            </Link>
             
             <Link href="/cart" className="p-2 text-primary dark:text-white hover:bg-surface-container-low rounded-full transition-all relative">
               <span className="material-symbols-outlined text-2xl font-light">shopping_cart</span>
@@ -129,22 +115,10 @@ export default function Navbar() {
                   />
                 </form>
                 
-                <div className="flex flex-col gap-6">
-                  <Link href="/profile" className="flex items-center gap-4 text-xs font-black text-primary">
-                    <span className="material-symbols-outlined font-light">account_circle</span>
-                    Profile Manifest
-                  </Link>
-                  <button 
-                    onClick={async () => {
-                      await logout();
-                      window.location.href = '/login';
-                    }}
-                    className="flex items-center gap-4 text-xs font-black text-error text-left"
-                  >
-                    <span className="material-symbols-outlined font-light">logout</span>
-                    Sign Out
-                  </button>
-                </div>
+                <Link href={user ? "/profile" : "/login"} className="flex items-center gap-4 text-xs font-black text-primary">
+                  <span className="material-symbols-outlined font-light">person</span>
+                  {user ? 'My Profile' : 'Sign In'}
+                </Link>
               </div>
             </div>
           </motion.div>
