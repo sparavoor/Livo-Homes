@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { Banner } from '@/lib/db';
 
 interface HeroSliderProps {
@@ -38,11 +39,14 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
           transition={{ duration: 1.5, ease: [0.19, 1, 0.22, 1] }}
           className="absolute inset-0 rounded-3xl overflow-hidden m-4"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img 
+          {/* next/image for LCP & performance */}
+          <Image 
             className="w-full h-full object-cover opacity-50 scale-105 saturate-[0.8]" 
             alt={currentBanner.title} 
             src={currentBanner.image}
+            fill
+            priority={current === 0}
+            sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-tr from-primary via-primary/40 to-transparent"></div>
         </motion.div>

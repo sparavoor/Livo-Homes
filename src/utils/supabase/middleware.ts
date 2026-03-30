@@ -30,7 +30,16 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // refreshing the auth token
+  // Optimization: Skip auth network request for public pages if no auth cookie is present
+  const pathname = request.nextUrl.pathname;
+  const isPublicRoute = !pathname.startsWith('/admin') && !pathname.startsWith('/profile') && !pathname.startsWith('/checkout');
+  const authCookie = request.cookies.get('sb-livo-auth-token');
+  
+  if (isPublicRoute && !authCookie) {
+    return { supabaseResponse, user: null };
+  }
+
+  // Refresh auth token only if we potentially have a session or are on a protected route
   const { data: { user } } = await supabase.auth.getUser()
 
   return { supabaseResponse, user }

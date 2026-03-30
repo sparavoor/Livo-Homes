@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getProducts, getCategories, getBanners, Product, Category, Banner } from '@/lib/db';
+import { getProducts, getCategories, getBanners, getSignatureMasterpieces, getRecentProducts, Product, Category, Banner } from '@/lib/db';
 import { getWhatsAppLink, DEFAULT_INQUIRY_MESSAGE } from '@/lib/whatsapp';
 import MotionSection from '@/components/MotionSection';
 import MotionItem from '@/components/MotionItem';
@@ -8,16 +8,12 @@ import CategoryCard from '@/components/CategoryCard';
 import HeroSlider from '@/components/HeroSlider';
 
 export default async function Home() {
-  const [products, categories, banners] = await Promise.all([
-    getProducts(),
+  const [signatureMasterpieces, recentlyAdded, categories, banners] = await Promise.all([
+    getSignatureMasterpieces(8),
+    getRecentProducts(8),
     getCategories(),
     getBanners()
   ]);
-
-  const signatureMasterpieces = products.filter(p => p.isSignatureMasterpiece);
-  const recentlyAdded = [...products].sort((a, b) =>
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  ).slice(0, 8);
   const latestProduct = recentlyAdded[0];
 
   return (

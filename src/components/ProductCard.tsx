@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function ProductCard({ 
   name, 
@@ -21,11 +22,14 @@ export default function ProductCard({
   return (
     <div className="group flex flex-col bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-outline/5 hover:border-brand-accent/20">
       <Link href={`/products/${id}`} className="relative aspect-[4/5] overflow-hidden bg-surface-container-low block">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img 
+        {/* next/image for automatic compression & lazy loading */}
+        <Image 
           alt={name} 
           className="w-full h-full object-cover transition-transform duration-1000 ease-[0.19,1,0.22,1] group-hover:scale-105" 
-          src={image} 
+          src={image}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+          priority={false}
         />
         
         {isNew && (

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { supabaseAdmin } from './supabase-admin';
 
 const PRODUCTS_PATH = path.join(process.cwd(), 'src/data/products.json');
 const CATEGORIES_PATH = path.join(process.cwd(), 'src/data/categories.json');
@@ -60,6 +61,28 @@ export interface Category {
   count: number;
 }
 
+function mapDbProduct(p: any): Product {
+  return {
+    id: p.id,
+    name: p.name,
+    category: p.category,
+    price: Number(p.price),
+    originalPrice: p.original_price ? Number(p.original_price) : undefined,
+    description: p.description,
+    image: p.image,
+    images: p.images || [p.image],
+    stock: p.stock,
+    isNew: p.is_new,
+    isBestseller: p.is_bestseller,
+    isSignatureMasterpiece: p.is_signature_masterpiece,
+    createdAt: p.created_at,
+    material: p.material,
+    color: p.color,
+    size: p.size,
+    availability: p.availability,
+  };
+}
+
 // Products
 export async function getProducts(page: number = 1, limit?: number): Promise<Product[]> {
   try {
@@ -80,25 +103,7 @@ export async function getProducts(page: number = 1, limit?: number): Promise<Pro
       if (error) throw error;
 
       if (data && data.length > 0) {
-        return data.map((p: any) => ({
-          id: p.id,
-          name: p.name,
-          category: p.category,
-          price: Number(p.price),
-          originalPrice: p.original_price ? Number(p.original_price) : undefined,
-          description: p.description,
-          image: p.image,
-          images: p.images || [p.image],
-          stock: p.stock,
-          isNew: p.is_new,
-          isBestseller: p.is_bestseller,
-          isSignatureMasterpiece: p.is_signature_masterpiece,
-          createdAt: p.created_at,
-          material: p.material,
-          color: p.color,
-          size: p.size,
-          availability: p.availability,
-        }));
+        return data.map(mapDbProduct);
       }
     }
 
@@ -119,8 +124,39 @@ export async function getProducts(page: number = 1, limit?: number): Promise<Pro
   }
 }
 
+// Specialized queries for performance
+export async function getSignatureMasterpieces(limit: number = 4): Promise<Product[]> {
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from('products')
+      .select('*')
+      .eq('is_signature_masterpiece', true)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return (data || []).map(mapDbProduct);
+  }
+  const products = await getProducts();
+  return products.filter(p => p.isSignatureMasterpiece).slice(0, limit);
+}
+
+export async function getRecentProducts(limit: number = 8): Promise<Product[]> {
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return (data || []).map(mapDbProduct);
+  }
+  const products = await getProducts();
+  return products.slice(0, limit);
+}
+
 export async function saveProducts(products: Product[]): Promise<void> {
-  // Not used anymore as we save directly to DB, but kept for JSON fallback
   try {
     fs.writeFileSync(PRODUCTS_PATH, JSON.stringify(products, null, 2));
   } catch (error) {
@@ -153,28 +189,13 @@ export async function addProduct(product: Omit<Product, 'id' | 'createdAt'>): Pr
         .select()
         .single();
 
-      if (error) {
-        console.error('Supabase addProduct error:', error);
-        throw error;
-      }
-      
-      if (data) {
-        return {
-          ...product,
-          id: data.id,
-          createdAt: data.created_at,
-          isSignatureMasterpiece: data.is_signature_masterpiece,
-          availability: data.availability,
-        } as Product;
-      }
+      if (error) throw error;
+      if (data) return mapDbProduct(data);
     } catch (error) {
       console.error('Failed to add product to Supabase:', error);
-      // Fallback to JSON below
     }
   }
 
-
-  // Fallback to JSON
   const products = await getProducts();
   const newProduct: Product = {
     ...product,
@@ -192,13 +213,11 @@ export async function addProduct(product: Omit<Product, 'id' | 'createdAt'>): Pr
 export async function updateProduct(id: string, updates: Partial<Product>): Promise<Product | null> {
   if (supabaseAdmin) {
     const dbUpdates: any = { ...updates };
-    // Map camelCase to snake_case
     if (updates.originalPrice !== undefined) dbUpdates.original_price = updates.originalPrice;
     if (updates.isNew !== undefined) dbUpdates.is_new = updates.isNew;
     if (updates.isBestseller !== undefined) dbUpdates.is_bestseller = updates.isBestseller;
     if (updates.isSignatureMasterpiece !== undefined) dbUpdates.is_signature_masterpiece = updates.isSignatureMasterpiece;
 
-    // Delete camelCase versions
     delete dbUpdates.originalPrice;
     delete dbUpdates.isNew;
     delete dbUpdates.isBestseller;
@@ -214,30 +233,9 @@ export async function updateProduct(id: string, updates: Partial<Product>): Prom
       .single();
 
     if (error) throw error;
-    if (data) {
-      return {
-        id: data.id,
-        name: data.name,
-        category: data.category,
-        price: Number(data.price),
-        originalPrice: data.original_price ? Number(data.original_price) : undefined,
-        description: data.description,
-        image: data.image,
-        images: data.images || [data.image],
-        stock: data.stock,
-        isNew: data.is_new,
-        isBestseller: data.is_bestseller,
-        isSignatureMasterpiece: data.is_signature_masterpiece,
-        createdAt: data.created_at,
-        material: data.material,
-        color: data.color,
-        size: data.size,
-        availability: data.availability,
-      };
-    }
+    if (data) return mapDbProduct(data);
   }
 
-  // Fallback to JSON
   const products = await getProducts();
   const index = products.findIndex(p => p.id === id);
   if (index === -1) return null;
@@ -258,7 +256,6 @@ export async function deleteProduct(id: string): Promise<boolean> {
     return true;
   }
 
-  // Fallback to JSON
   const products = await getProducts();
   const filtered = products.filter(p => p.id !== id);
   if (filtered.length === products.length) return false;
@@ -273,7 +270,6 @@ export async function getCategories(): Promise<Category[]> {
     let categories: Category[] = [];
 
     if (supabaseAdmin) {
-      // Use SQL to get counts more efficiently
       const { data, error } = await supabaseAdmin
         .from('categories')
         .select(`
@@ -296,7 +292,6 @@ export async function getCategories(): Promise<Category[]> {
     }
 
     if (categories.length === 0) {
-      // Fallback to JSON
       if (!fs.existsSync(CATEGORIES_PATH)) return [];
       const data = fs.readFileSync(CATEGORIES_PATH, 'utf8');
       categories = JSON.parse(data);
@@ -310,7 +305,6 @@ export async function getCategories(): Promise<Category[]> {
 }
 
 export async function saveCategories(categories: Category[]): Promise<void> {
-  // Kept for JSON fallback
   try {
     fs.writeFileSync(CATEGORIES_PATH, JSON.stringify(categories, null, 2));
   } catch (error) {
@@ -320,7 +314,6 @@ export async function saveCategories(categories: Category[]): Promise<void> {
 
 export async function addCategory(category: Omit<Category, 'id' | 'count'>): Promise<Category> {
   if (supabaseAdmin) {
-    // Generate a unique-ish slug based on the name
     const timestamp = Date.now().toString(36).substr(-4);
     const id = `${category.name.toLowerCase().replace(/\s+/g, '-')}-${timestamp}`;
     
@@ -336,22 +329,7 @@ export async function addCategory(category: Omit<Category, 'id' | 'count'>): Pro
         .select()
         .single();
 
-      if (error) {
-        console.error('Supabase addCategory error:', error);
-        
-        // Specific handling for missing table error
-        if ((error as any).code === 'PGRST116' || (error as any).code === 'PGRST205' || (error as any).message?.includes('not found')) {
-          throw new Error('The "categories" table was not found in Supabase. Please run the SQL migration.');
-        }
-        
-        // Specific handling for RLS issues (though admin bypasses it)
-        if ((error as any).code === '42501') {
-          throw new Error('RLS Permission denied. Ensure your Service Role Key is correct.');
-        }
-
-        throw error;
-      }
-
+      if (error) throw error;
       if (data) {
         return {
           id: data.id,
@@ -361,13 +339,11 @@ export async function addCategory(category: Omit<Category, 'id' | 'count'>): Pro
           count: 0
         };
       }
-    } catch (dbError: any) {
-      console.error('Database insertion failed:', dbError.message);
-      // If DB fails, we still have the JSON fallback below
+    } catch (dbError) {
+      console.error('Database insertion failed:', dbError);
     }
   }
 
-  // Fallback to JSON
   const categories = await getCategories();
   const newCategory = {
     ...category,
@@ -395,12 +371,11 @@ export async function updateCategory(id: string, updates: Partial<Category>): Pr
         name: data.name,
         image: data.image,
         description: data.description || '',
-        count: 0 // Count will be filled by getCategories if needed
+        count: 0
       };
     }
   }
 
-  // Fallback to JSON
   const categories = await getCategories();
   const index = categories.findIndex(c => c.id === id);
   if (index === -1) return null;
@@ -421,7 +396,6 @@ export async function deleteCategory(id: string): Promise<boolean> {
     return true;
   }
 
-  // Fallback to JSON
   const categories = await getCategories();
   const filtered = categories.filter(c => c.id !== id);
   if (filtered.length === categories.length) return false;
@@ -475,38 +449,35 @@ export async function saveSettings(settings: SiteSettings): Promise<void> {
   }
 }
 
-import { supabaseAdmin } from './supabase-admin';
-
 // Banners
 export async function getBanners(): Promise<Banner[]> {
   try {
-    if (!supabaseAdmin) throw new Error('Supabase admin not configured');
-    
-    const { data, error } = await supabaseAdmin
-      .from('banners')
-      .select('*')
-      .eq('is_active', true)
-      .order('display_order', { ascending: true });
+    if (supabaseAdmin) {
+      const { data, error } = await supabaseAdmin
+        .from('banners')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
 
-    if (error) {
-      if ((error as any).code === 'PGRST205') {
-        console.warn('Supabase banners table not found. Falling back to local JSON data.');
-      } else {
-        throw error;
+      if (error) {
+        if ((error as any).code === 'PGRST205') {
+          console.warn('Supabase banners table not found. Falling back to local JSON data.');
+        } else {
+          throw error;
+        }
+      } else if (data && data.length > 0) {
+        return data.map((b: any) => ({
+          id: b.id,
+          title: b.title,
+          subtitle: b.subtitle,
+          image: b.image_url,
+          link: b.link_url,
+          isActive: b.is_active,
+          order: b.display_order
+        }));
       }
-    } else if (data && data.length > 0) {
-      return data.map((b: any) => ({
-        id: b.id,
-        title: b.title,
-        subtitle: b.subtitle,
-        image: b.image_url,
-        link: b.link_url,
-        isActive: b.is_active,
-        order: b.display_order
-      }));
     }
 
-    // Fallback to JSON if DB is empty
     if (!fs.existsSync(BANNERS_PATH)) {
       return [{
         id: '1',

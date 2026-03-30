@@ -1,15 +1,18 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function CategoryCard({ title, image, link }: { title: string, image: string, link: string }) {
   return (
     <div className="group relative h-[400px] overflow-hidden rounded-lg bg-surface-container-low border border-outline/5 transition-all duration-700 hover:shadow-2xl">
       <Link href={link} className="block w-full h-full">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img 
+        {/* next/image for performance */}
+        <Image 
           alt={title} 
           className="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 group-hover:scale-110 transition-all duration-[1.5s] ease-[0.19,1,0.22,1]" 
-          src={image} 
+          src={image}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         
         {/* Subtle Overlay */}
