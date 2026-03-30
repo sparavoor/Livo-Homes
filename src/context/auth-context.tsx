@@ -142,12 +142,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     if (!supabase) return;
     try {
-      await supabase.auth.signOut();
+      console.log("AuthContext: Initiating logout...");
+      await supabase.auth.signOut({ scope: 'global' });
+      
+      // Explicitly clear the cookie (Double insurance)
+      if (typeof document !== 'undefined') {
+        document.cookie = "sb-livo-auth-token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+      }
+
       // Explicitly clear state to ensure UI updates immediately
       setUser(null);
       setProfile(null);
+      console.log("AuthContext: Logout successful.");
     } catch (error) {
-      console.error("Error signing out:", error);
+      console.error("AuthContext: Error signing out:", error);
       // Still clear state even if server-side signout fails
       setUser(null);
       setProfile(null);
