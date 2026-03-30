@@ -25,7 +25,9 @@ function LoginContent() {
 
   useEffect(() => {
     if (isMounted && user) {
-      router.push(redirect);
+      // Small delay to ensure session is fully persisted if needed
+      // but usually replace is sufficient
+      router.replace(redirect);
     }
   }, [user, router, redirect, isMounted]);
 

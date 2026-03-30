@@ -25,7 +25,7 @@ function RegisterContent() {
 
   useEffect(() => {
     if (isMounted && user) {
-      router.push(redirect);
+      router.replace(redirect);
     }
   }, [user, router, redirect, isMounted]);
 
