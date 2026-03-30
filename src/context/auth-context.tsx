@@ -43,19 +43,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) {
         if (error.code === 'PGRST116') {
-          // This is a "Row not found" which is normal if the profile trigger hasn't run yet
-          console.warn("Profile not found for user:", userId);
-        } else {
-          console.error("Error fetching profile:", error.message || error);
-          if (error.details) console.error("Details:", error.details);
-          if (error.hint) console.error("Hint:", error.hint);
+          // Profile doesn't exist, which can happen if the trigger failed or just signed up
+          console.warn("Profile not found locally, using minimal fallback for user:", userId);
+          return { id: userId, full_name: 'Architectural Member', privilege_tier: 'standard' } as Profile;
         }
-        return null;
+        console.error("Error fetching profile:", error.message);
+        return { id: userId, full_name: 'Architectural Member', privilege_tier: 'standard' } as Profile;
       }
       return data as Profile;
     } catch (error: any) {
-      console.error("Error in fetchProfile:", error.message || error);
-      return null;
+      console.error("Error in fetchProfile:", error.message);
+      return { id: userId, full_name: 'Architectural Member', privilege_tier: 'standard' } as Profile;
     }
   };
 

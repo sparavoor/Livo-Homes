@@ -47,9 +47,9 @@ interface Order {
 }
 
 export default function ProfilePage() {
-  const { user, profile, loading, logout, refreshProfile } = useAuth();
+  const { user, profile, loading: authLoading, logout, refreshProfile } = useAuth();
   const router = useRouter();
-  const [hasMounted, setHasMounted] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const [activeTab, setActiveTab] = useState('orders');
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   
@@ -60,7 +60,7 @@ export default function ProfilePage() {
   const [settingsMessage, setSettingsMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
-    setHasMounted(true);
+    setIsMounted(true);
   }, []);
 
   // Data states
@@ -81,17 +81,20 @@ export default function ProfilePage() {
   const [promoCodes, setPromoCodes] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
+    if (isMounted && !authLoading && !user) {
+      router.push('/login?redirect=/profile');
     }
+  }, [user, authLoading, router, isMounted]);
+
+  useEffect(() => {
     if (profile) {
       setEditName(profile.full_name || '');
       setEditPhone(profile.phone || '');
     }
-  }, [user, loading, router, profile]);
+  }, [profile]);
 
   useEffect(() => {
-    if (user) {
+    if (user && isMounted) {
       if (activeTab === 'address') fetchAddresses();
       if (activeTab === 'orders') {
         fetchProducts();
@@ -99,7 +102,7 @@ export default function ProfilePage() {
       }
       if (activeTab === 'coupons') fetchPromoCodes();
     }
-  }, [user, activeTab]);
+  }, [user, activeTab, isMounted]);
 
   const fetchPromoCodes = async () => {
     try {
@@ -266,14 +269,14 @@ export default function ProfilePage() {
   const handleLogout = async () => {
     try {
       await logout();
-      window.location.href = '/';
+      window.location.href = '/login';
     } catch (error) {
       console.error("Logout failed:", error);
-      window.location.href = '/';
+      window.location.href = '/login';
     }
   };
 
-  if (!hasMounted || loading) {
+  if (!isMounted || authLoading) {
     return (
       <div className="container mx-auto px-8 py-24 pt-32 flex justify-center items-center min-h-[60vh]">
         <div className="animate-pulse flex flex-col items-center text-center">
