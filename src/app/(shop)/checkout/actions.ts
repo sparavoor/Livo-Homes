@@ -94,6 +94,7 @@ export async function createOrderAction(orderData: OrderData) {
   }
 
   revalidatePath('/admin/orders');
+  revalidatePath('/profile');
   
   return order;
 }
