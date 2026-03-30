@@ -21,8 +21,6 @@ export const supabase = isValidUrl(supabaseUrl)
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: true,
-        // Disable browser locking to prevent "Another request stole it" errors
-        // specifically when multiple instances might clash in development or multi-tab
         storageKey: 'sb-livo-auth-token',
       }
     }))

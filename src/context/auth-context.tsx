@@ -126,10 +126,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithGoogle = async () => {
     if (!supabase) throw new Error("Supabase is not configured. Check your .env.local file.");
     try {
+      // Get the redirect path from the URL if it exists, otherwise default to profile
+      const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+      const redirectPath = params?.get('redirect') || '/profile';
+      const redirectTo = typeof window !== 'undefined' 
+        ? `${window.location.origin}${redirectPath}`
+        : '';
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: typeof window !== 'undefined' ? window.location.origin : ''
+          redirectTo: redirectTo
         }
       });
       if (error) throw error;
