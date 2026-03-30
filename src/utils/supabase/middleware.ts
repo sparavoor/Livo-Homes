@@ -24,6 +24,9 @@ export async function updateSession(request: NextRequest) {
           )
         },
       },
+      auth: {
+        storageKey: 'sb-livo-auth-token',
+      }
     }
   )
 

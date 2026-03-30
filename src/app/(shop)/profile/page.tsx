@@ -107,6 +107,10 @@ export default function ProfilePage() {
   const fetchPromoCodes = async () => {
     try {
       const allPromos = await fetchPromoCodesAction();
+      if (!allPromos) {
+        setPromoCodes([]);
+        return;
+      }
       
       const privilegeHierarchy: Record<string, number> = {
         'standard': 0,
@@ -117,14 +121,15 @@ export default function ProfilePage() {
 
       const userLevel = privilegeHierarchy[profile?.privilege_tier?.toLowerCase() || 'standard'] || 0;
       
-      const availablePromos = (allPromos || []).filter(promo => {
+      const availablePromos = allPromos.filter(promo => {
         const requiredLevel = privilegeHierarchy[promo.min_privilege?.toLowerCase() || 'standard'] || 0;
         return userLevel >= requiredLevel && promo.status === 'active';
       });
 
       setPromoCodes(availablePromos);
-    } catch (error) {
-      console.error("Error fetching promo codes:", error);
+    } catch (error: any) {
+      console.warn("Error fetching promo codes (table might be missing):", error.message);
+      setPromoCodes([]);
     }
   };
 
