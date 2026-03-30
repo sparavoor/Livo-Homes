@@ -65,24 +65,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    if (!supabase) {
-      setLoading(false);
-      return;
-    }
-
-    // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }: { data: { session: Session | null } }) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        const p = await fetchProfile(currentUser.id);
-        setProfile(p);
+    // Initial check
+    const checkSession = async () => {
+      if (!supabase) {
+        console.warn("AuthContext: Supabase client is null. Verify .env.local keys.");
+        setLoading(false);
+        return;
       }
+      
+      try {
+        console.log("AuthContext: Checking initial session...");
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        
+        if (currentUser) {
+          console.log("AuthContext: Initial session found for user:", currentUser.id);
+          const p = await fetchProfile(currentUser.id);
+          setProfile(p);
+        } else {
+          console.log("AuthContext: No initial session found.");
+          setProfile(null);
+        }
+      } catch (err: any) {
+        console.error("AuthContext: Error checking initial session:", err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkSession();
+
+    // Safety timeout for loading state
+    const timer = setTimeout(() => {
       setLoading(false);
-    });
+    }, 5000);
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {
+      console.log("AuthContext: Auth State Change Event:", _event);
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       if (currentUser) {
@@ -94,8 +117,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      clearTimeout(timer);
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   const loginWithGoogle = async () => {
     if (!supabase) throw new Error("Supabase is not configured. Check your .env.local file.");
