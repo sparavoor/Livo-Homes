@@ -55,17 +55,21 @@ export default function ProfilePage() {
         .eq('id', user.id);
 
       if (error) throw error;
+      
+      // Force refreshing the profile to ensure UI update
       await refreshProfile();
       setIsEditing(false);
     } catch (error: any) {
-      alert(error.message || 'Failed to update profile');
+      console.error('Profile update failed:', error.message);
+      alert(error.message || 'Architectural credentials could not be updated. Verify your connectivity.');
     } finally {
       setIsUpdating(false);
     }
   };
 
   const handleLogout = async () => {
-    await logout();
+    // Initiate logout and redirect immediately to avoid UI hang
+    logout();
     router.push('/');
   };
 

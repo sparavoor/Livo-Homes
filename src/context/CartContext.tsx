@@ -155,19 +155,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     prevUserRef.current = user;
   }, [user]);
 
-  // Save cart to localStorage and DB on change
+  // Save cart to localStorage and DB on change (with debounce for DB sync)
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
       return;
     }
     
-    // Save to localStorage
+    // Save to localStorage immediately for consistency
     localStorage.setItem(storageKey, JSON.stringify(items));
 
-    // Save to DB if logged in
+    // DB Synchronization (Debounced to improve performance)
     if (user && !loading) {
-      syncCartToDb(user.id, items);
+      const handler = setTimeout(() => {
+        console.log(`CartContext: Syncing ${items.length} items to database for user ${user.id}...`);
+        syncCartToDb(user.id, items);
+      }, 1500); // 1.5 second delay before triggering heavy DELETE/INSERT operations
+
+      return () => {
+        clearTimeout(handler);
+      };
     }
   }, [items, storageKey, user, loading]);
 

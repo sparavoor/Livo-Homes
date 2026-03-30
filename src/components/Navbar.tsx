@@ -34,8 +34,9 @@ export default function Navbar() {
     return pathname.startsWith(path);
   };
 
-  const handleLogout = async () => {
-    await logout();
+  const handleLogout = () => {
+    // Initiate logout and redirect immediately
+    logout();
     router.push('/');
   };
 
