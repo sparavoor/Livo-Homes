@@ -21,7 +21,19 @@ export const supabase = isValidUrl(supabaseUrl)
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: true,
-        storageKey: 'sb-livo-auth-token',
+        flowType: 'pkce',
+        // Provide a primitive custom storage to bypass standard locking
+        storage: typeof window !== 'undefined' ? {
+          getItem: (key) => window.localStorage.getItem(key),
+          setItem: (key, value) => window.localStorage.setItem(key, value),
+          removeItem: (key) => window.localStorage.removeItem(key),
+        } : undefined,
+      },
+      cookieOptions: {
+        name: 'sb-livo-auth-token',
+        path: '/',
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
       }
     }))
   : null as any;

@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import { supabaseAdmin } from './supabase-admin';
 import { CartItem } from '@/context/CartContext';
+import { sendOrderEmail, getOrderEmailTemplate } from './email';
 
 export interface OrderData {
   user_id?: string;
@@ -76,6 +77,12 @@ export async function createOrder(orderData: OrderData) {
     throw itemsError;
   }
 
+  // 4. Send Confirmation Email
+  if (order.customer_email) {
+    const emailHtml = getOrderEmailTemplate(order, 'pending');
+    await sendOrderEmail(order.customer_email, `Procurement Logged: #LIVO-${order.id.slice(-6).toUpperCase()}`, emailHtml);
+  }
+
   return order;
 }
 
@@ -86,7 +93,10 @@ export async function getUserOrders(userId: string) {
     .from('orders')
     .select(`
       *,
-      order_items (*)
+      order_items (
+        *,
+        products (image)
+      )
     `)
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
@@ -155,6 +165,84 @@ export async function updateOrderStatus(orderId: string, status: string) {
   if (error) {
     console.error('Error updating order status:', error);
     throw error;
+  }
+
+  // Send Status Update Email
+  if (data.customer_email) {
+    const emailHtml = getOrderEmailTemplate(data, status);
+    await sendOrderEmail(data.customer_email, `Order Status Update: #LIVO-${data.id.slice(-6).toUpperCase()}`, emailHtml);
+  }
+
+  return data;
+}
+
+export async function cancelOrder(orderId: string, userId?: string) {
+  const client = supabaseAdmin || supabase;
+  if (!client) throw new Error('Supabase not initialized');
+
+  // 1. Basic ID Validation (UUID check)
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(orderId)) {
+    throw new Error('Invalid Procurement ID structure.');
+  }
+
+  // 2. Fetch current status for verification using maybeSingle()
+  const { data: currentOrder, error: fetchError } = await client
+    .from('orders')
+    .select('status, customer_email, id')
+    .eq('id', orderId)
+    .maybeSingle();
+
+  if (fetchError) {
+    console.error('Error fetching order status before cancellation:', fetchError.message);
+    throw new Error('Could not verify procurement status.');
+  }
+
+  if (!currentOrder) {
+    throw new Error('This procurement record could not be found in the registry.');
+  }
+
+  console.log(`CANCEL_ORDER_DEBUG: Order #${orderId.slice(-6)} - Current Status (DB): "${currentOrder.status}"`);
+
+  // 3. Validate Eligibility (Case-Insensitive)
+  const normalizedStatus = (currentOrder.status || '').toLowerCase();
+  if (normalizedStatus !== 'pending') {
+    throw new Error(`This procurement is no longer eligible for withdrawal (Actual Status: ${currentOrder.status}).`);
+  }
+
+  console.log(`Initiating withdrawal for procurement: #${orderId.slice(-6)}`);
+
+  // 4. Execute Cancellation using maybeSingle() to prevent "Cannot coerce result to a single JSON object"
+  let query = client
+    .from('orders')
+    .update({ status: 'cancelled' })
+    .eq('id', orderId);
+
+  if (userId) {
+    query = query.eq('user_id', userId);
+  }
+
+  const { data, error } = await query
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    console.error('DATABASE CRITICAL ERROR:', error.message || error);
+    throw new Error(error.message || 'The registry could not process this withdrawal request.');
+  }
+
+  if (!data) {
+    throw new Error('Failed to update the procurement status. This could be due to permission restrictions.');
+  }
+
+  // 5. Dispatch Email
+  if (data.customer_email) {
+    try {
+      const emailHtml = getOrderEmailTemplate(data, 'cancelled');
+      await sendOrderEmail(data.customer_email, `Procurement Withdrawn: #LIVO-${data.id.slice(-6).toUpperCase()}`, emailHtml);
+    } catch (emailErr) {
+      console.warn('Withdrawal email dispatch failed:', emailErr);
+    }
   }
 
   return data;

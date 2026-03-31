@@ -14,9 +14,15 @@ export default function Footer() {
             To be the most trusted and sought-after brand in the sanitaryware industry, recognized for our commitment to quality, affordability, and customer satisfaction.
           </p>
           <div className="flex space-x-6">
-            <span className="material-symbols-outlined text-slate-300 cursor-pointer hover:text-primary transition-colors text-xl">public</span>
-            <span className="material-symbols-outlined text-slate-300 cursor-pointer hover:text-primary transition-colors text-xl">share</span>
-            <span className="material-symbols-outlined text-slate-300 cursor-pointer hover:text-primary transition-colors text-xl">star</span>
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-slate-300 hover:text-[#1877F2] transition-colors text-lg">
+              <i className="fa-brands fa-facebook"></i>
+            </a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-slate-300 hover:text-[#E4405F] transition-colors text-lg">
+              <i className="fa-brands fa-instagram"></i>
+            </a>
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-slate-300 hover:text-[#FF0000] transition-colors text-lg">
+              <i className="fa-brands fa-youtube"></i>
+            </a>
           </div>
         </div>
         <div className="flex flex-col space-y-6">

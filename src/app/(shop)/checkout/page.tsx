@@ -6,16 +6,34 @@ import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createOrder } from '@/lib/orders';
+import { getUserAddresses, addUserAddress, UserAddress } from '@/lib/addresses';
 import Link from 'next/link';
+import indianStatesData from '@/data/indian-states.json';
+
+const STATES = indianStatesData.states.map(s => s.state);
+const DISTRICTS: Record<string, string[]> = indianStatesData.states.reduce((acc, curr) => {
+  acc[curr.state] = curr.districts;
+  return acc;
+}, {} as Record<string, string[]>);
 
 export default function CheckoutPage() {
   const { items, subtotal, clearCart, totalItems } = useCart();
   const { user, profile, loading: authLoading } = useAuth();
   const router = useRouter();
+
+  // Constants for Tax & Shipping
+  const TAX_RATE = 0.18; // 18% GST
+  const SHIPPING_CHARGE = 25;
+  const ESTIMATED_TAX = subtotal * TAX_RATE;
+  const GRAND_TOTAL = subtotal + ESTIMATED_TAX + SHIPPING_CHARGE;
   
   const [step, setStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isProcessingSuccess, setIsProcessingSuccess] = useState(false);
   const [error, setError] = useState('');
+  
+  const [savedAddresses, setSavedAddresses] = useState<UserAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>('new');
 
   // Shipping Info
   const [shippingInfo, setShippingInfo] = useState({
@@ -23,16 +41,18 @@ export default function CheckoutPage() {
     customer_email: '',
     customer_phone: '',
     shipping_address: '',
-    city: '',
+    state: '',
+    district: '',
     pincode: '',
     payment_method: 'cod'
   });
 
   useEffect(() => {
-    if (items.length === 0 && !isProcessing) {
+    // Only redirect if cart is empty AND we ARE NOT in the middle of a successful order processing
+    if (items.length === 0 && !isProcessing && !isProcessingSuccess && step < 3) {
       router.push('/products');
     }
-  }, [items, router, isProcessing]);
+  }, [items, router, isProcessing, isProcessingSuccess, step]);
 
   useEffect(() => {
     if (user && profile) {
@@ -42,12 +62,59 @@ export default function CheckoutPage() {
         customer_email: profile.email || '',
         customer_phone: profile.phone || ''
       }));
+
+      // Fetch user's saved addresses
+      getUserAddresses(user.id).then(addresses => {
+        setSavedAddresses(addresses);
+        if (addresses.length > 0) {
+          const primary = addresses.find(a => a.is_primary) || addresses[0];
+          setSelectedAddressId(primary.id);
+          setShippingInfo(prev => ({
+            ...prev,
+            shipping_address: primary.address_line,
+            state: primary.state,
+            district: primary.district,
+            pincode: primary.pincode
+          }));
+        }
+      });
     }
   }, [user, profile]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setShippingInfo(prev => ({ ...prev, [name]: value }));
+    setShippingInfo(prev => {
+      const updated = { ...prev, [name]: value };
+      // Reset district if state changes
+      if (name === 'state') {
+        updated.district = '';
+      }
+      return updated;
+    });
+  };
+
+  const handleAddressSelect = (id: string) => {
+    setSelectedAddressId(id);
+    if (id === 'new') {
+      setShippingInfo(prev => ({
+        ...prev,
+        shipping_address: '',
+        state: '',
+        district: '',
+        pincode: ''
+      }));
+    } else {
+      const addr = savedAddresses.find(a => a.id === id);
+      if (addr) {
+        setShippingInfo(prev => ({
+          ...prev,
+          shipping_address: addr.address_line,
+          state: addr.state,
+          district: addr.district,
+          pincode: addr.pincode
+        }));
+      }
+    }
   };
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
@@ -56,21 +123,33 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
+      // If entering a new address and the user is logged in, save it to their profile.
+      if (selectedAddressId === 'new' && user) {
+        await addUserAddress({
+          user_id: user.id,
+          title: 'Recent Address',
+          state: shippingInfo.state,
+          district: shippingInfo.district,
+          address_line: shippingInfo.shipping_address,
+          pincode: shippingInfo.pincode,
+          is_primary: savedAddresses.length === 0
+        });
+      }
+
       const orderData = {
         user_id: user?.id,
         ...shippingInfo,
-        total_amount: subtotal,
+        city: shippingInfo.district, // Map district to city to satisfy existing backend schema
+        total_amount: GRAND_TOTAL,
         items: items
       };
 
       const order = await createOrder(orderData);
       
       if (order) {
+        setIsProcessingSuccess(true);
         clearCart();
-        setStep(3); // Success step
-        setTimeout(() => {
-          router.push('/profile');
-        }, 5000);
+        router.push(`/checkout/success?orderId=${order.id}`);
       }
     } catch (err: any) {
       setError(err.message || 'Failed to place order. Please check your registry details.');
@@ -91,7 +170,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="bg-background min-h-screen pt-40 pb-24 px-6 md:px-12 max-w-[1440px] mx-auto">
+    <div className="bg-background min-h-screen pt-40 pb-24 px-6 md:px-12 max-w-[1440px] mx-auto selection:bg-brand-accent/20">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
         
         {/* Checkout Flow */}
@@ -124,7 +203,7 @@ export default function CheckoutPage() {
                       value={shippingInfo.customer_name}
                       onChange={handleInputChange}
                       placeholder="Name recorded in manifest"
-                      className="w-full bg-white border border-outline/10 p-5 text-sm font-bold focus:border-brand-accent outline-none"
+                      className="w-full bg-white border border-outline/10 p-5 text-sm font-light focus:border-brand-accent outline-none transition-colors"
                       required
                     />
                   </div>
@@ -135,7 +214,7 @@ export default function CheckoutPage() {
                       value={shippingInfo.customer_phone}
                       onChange={handleInputChange}
                       placeholder="+91 00000 00000"
-                      className="w-full bg-white border border-outline/10 p-5 text-sm font-bold focus:border-brand-accent outline-none"
+                      className="w-full bg-white border border-outline/10 p-5 text-sm font-light focus:border-brand-accent outline-none transition-colors"
                       required
                     />
                   </div>
@@ -146,40 +225,95 @@ export default function CheckoutPage() {
                       value={shippingInfo.customer_email}
                       onChange={handleInputChange}
                       placeholder="alexander@architect.livo"
-                      className="w-full bg-white border border-outline/10 p-5 text-sm font-bold focus:border-brand-accent outline-none"
+                      className="w-full bg-white border border-outline/10 p-5 text-sm font-light focus:border-brand-accent outline-none transition-colors"
                       required
                     />
                   </div>
-                  <div className="md:col-span-2 space-y-4">
-                    <label className="text-[8px] font-black text-secondary/40 uppercase tracking-[0.4em]">Architectural Site Address</label>
+
+                  <div className="md:col-span-2 space-y-4 pt-6 mt-2 border-t border-outline/5">
+                    <label className="text-[8px] font-black text-secondary/40 uppercase tracking-[0.4em]">Delivery Designation</label>
+                    
+                    {savedAddresses.length > 0 && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                        {savedAddresses.map((addr) => (
+                          <div 
+                            key={addr.id}
+                            onClick={() => handleAddressSelect(addr.id)}
+                            className={`p-4 border cursor-pointer transition-colors flex flex-col gap-2 ${selectedAddressId === addr.id ? 'border-brand-accent bg-brand-accent/5' : 'border-outline/10 hover:border-outline/20 bg-white'}`}
+                          >
+                            <span className="text-[10px] uppercase tracking-widest text-primary font-medium">{addr.title || 'Saved Address'}</span>
+                            <span className="text-xs text-secondary font-light line-clamp-1">{addr.address_line}</span>
+                          </div>
+                        ))}
+                        <div 
+                          onClick={() => handleAddressSelect('new')}
+                          className={`p-4 border cursor-pointer transition-colors flex items-center justify-center gap-2 ${selectedAddressId === 'new' ? 'border-primary bg-surface-container-low' : 'border-dashed border-outline/20 hover:border-outline/40 bg-white'}`}
+                        >
+                          <span className="text-[10px] uppercase tracking-widest font-medium">Add New Address</span>
+                        </div>
+                      </div>
+                    )}
+
                     <textarea 
                       name="shipping_address"
                       value={shippingInfo.shipping_address}
                       onChange={handleInputChange}
+                      disabled={selectedAddressId !== 'new'}
                       placeholder="Street, Building, Floor"
-                      className="w-full bg-white border border-outline/10 p-5 text-sm font-bold focus:border-brand-accent outline-none min-h-[120px]"
+                      className="w-full bg-white border border-outline/10 p-5 text-sm font-light focus:border-brand-accent outline-none min-h-[120px] transition-colors disabled:bg-surface-container-low disabled:cursor-not-allowed"
                       required
                     />
                   </div>
+
                   <div className="space-y-4">
-                    <label className="text-[8px] font-black text-secondary/40 uppercase tracking-[0.4em]">City / District</label>
-                    <input 
-                      name="city"
-                      value={shippingInfo.city}
-                      onChange={handleInputChange}
-                      placeholder="Urban Sector"
-                      className="w-full bg-white border border-outline/10 p-5 text-sm font-bold focus:border-brand-accent outline-none"
-                      required
-                    />
+                    <label className="text-[8px] font-black text-secondary/40 uppercase tracking-[0.4em]">State / Region</label>
+                    <div className="relative">
+                      <select 
+                        name="state"
+                        value={shippingInfo.state}
+                        onChange={handleInputChange}
+                        disabled={selectedAddressId !== 'new'}
+                        className="w-full bg-white border border-outline/10 p-5 text-sm font-light focus:border-brand-accent outline-none appearance-none transition-colors disabled:bg-surface-container-low disabled:cursor-not-allowed"
+                        required
+                      >
+                        <option value="" disabled>Select State</option>
+                        {STATES.map(state => (
+                          <option key={state} value={state}>{state}</option>
+                        ))}
+                      </select>
+                      <span className="absolute right-5 top-1/2 -translate-y-1/2 material-symbols-outlined text-secondary pointer-events-none">expand_more</span>
+                    </div>
                   </div>
+
+                  <div className="space-y-4">
+                    <label className="text-[8px] font-black text-secondary/40 uppercase tracking-[0.4em]">District</label>
+                    <div className="relative">
+                      <select 
+                        name="district"
+                        value={shippingInfo.district}
+                        onChange={handleInputChange}
+                        disabled={selectedAddressId !== 'new' || !shippingInfo.state}
+                        className="w-full bg-white border border-outline/10 p-5 text-sm font-light focus:border-brand-accent outline-none appearance-none transition-colors disabled:bg-surface-container-low disabled:cursor-not-allowed"
+                        required
+                      >
+                        <option value="" disabled>Select District</option>
+                        {(shippingInfo.state && DISTRICTS[shippingInfo.state] ? DISTRICTS[shippingInfo.state] : []).map(district => (
+                          <option key={district} value={district}>{district}</option>
+                        ))}
+                      </select>
+                      <span className="absolute right-5 top-1/2 -translate-y-1/2 material-symbols-outlined text-secondary pointer-events-none">expand_more</span>
+                    </div>
+                  </div>
+
                   <div className="space-y-4">
                     <label className="text-[8px] font-black text-secondary/40 uppercase tracking-[0.4em]">Pincode</label>
                     <input 
                       name="pincode"
                       value={shippingInfo.pincode}
                       onChange={handleInputChange}
+                      disabled={selectedAddressId !== 'new'}
                       placeholder="000 000"
-                      className="w-full bg-white border border-outline/10 p-5 text-sm font-bold focus:border-brand-accent outline-none"
+                      className="w-full bg-white border border-outline/10 p-5 text-sm font-light focus:border-brand-accent outline-none transition-colors disabled:bg-surface-container-low disabled:cursor-not-allowed"
                       required
                     />
                   </div>
@@ -187,7 +321,7 @@ export default function CheckoutPage() {
 
                 <button 
                   onClick={() => setStep(2)}
-                  disabled={!shippingInfo.customer_name || !shippingInfo.shipping_address || !shippingInfo.customer_phone}
+                  disabled={!shippingInfo.customer_name || !shippingInfo.shipping_address || !shippingInfo.customer_phone || !shippingInfo.state || !shippingInfo.district}
                   className="bg-primary text-white text-[10px] font-black uppercase tracking-[0.4em] px-12 py-6 hover:bg-brand-accent transition-all duration-700 disabled:opacity-30 disabled:translate-y-0 shadow-xl active:scale-95"
                 >
                   Confirm Shipment Plan
@@ -302,16 +436,22 @@ export default function CheckoutPage() {
 
               <div className="space-y-6 border-t border-outline/5 pt-8">
                 <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-[0.3em]">
-                  <span className="text-secondary/50">Total Pieces</span>
-                  <span className="text-primary">{totalItems} Items</span>
+                  <span className="text-secondary/50">Subtotal</span>
+                  <span className="text-primary">₹{subtotal.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-[0.3em]">
+                  <span className="text-secondary/50">Estimated GST (18%)</span>
+                  <span className="text-primary">₹{ESTIMATED_TAX.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-[0.3em]">
                   <span className="text-secondary/50">Shipping Logistics</span>
-                  <span className="text-success">Complimentary</span>
+                  <span className="text-primary">
+                    ₹{SHIPPING_CHARGE.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center text-xl font-black pt-6 border-t border-dashed border-outline/10">
                   <span className="font-headline text-primary tracking-tighter">TOTAL VALUATION</span>
-                  <span className="text-brand-accent">₹{subtotal.toLocaleString()}</span>
+                  <span className="text-brand-accent">₹{GRAND_TOTAL.toLocaleString()}</span>
                 </div>
               </div>
 

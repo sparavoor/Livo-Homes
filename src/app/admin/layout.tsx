@@ -25,6 +25,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Categories', path: '/admin/categories', icon: 'category' },
     { name: 'Products', path: '/admin/products', icon: 'inventory_2' },
     { name: 'Hero Banners', path: '/admin/banners', icon: 'view_carousel' },
+    { name: 'Inquiries', path: '/admin/inquiries', icon: 'forum' },
     { name: 'Settings', path: '/admin/settings', icon: 'settings' },
   ];
 
