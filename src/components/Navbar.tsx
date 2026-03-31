@@ -47,7 +47,7 @@ export default function Navbar() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="LIVO HOMES" className="h-8 w-auto object-contain dark:brightness-0 dark:invert transition-all" />
         </Link>
-        
+
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center space-x-12 font-headline font-bold tracking-widest text-[10px] uppercase">
           <Link href="/" className={`architectural-underline pb-1 transition-colors ${isActive('/') ? 'text-brand-accent' : 'text-secondary hover:text-primary dark:hover:text-white'}`}>Home</Link>
@@ -60,7 +60,7 @@ export default function Navbar() {
           {/* Search Bar - Desktop */}
           <form onSubmit={handleSearch} className="hidden xl:flex items-center bg-surface-container-low px-4 py-2.5 rounded-full border border-outline/5 focus-within:border-brand-accent/30 transition-all group">
             <span className="material-symbols-outlined text-secondary group-focus-within:text-brand-accent text-xl transition-colors">search</span>
-            <input 
+            <input
               type="text"
               placeholder="Search aesthetics..."
               value={searchQuery}
@@ -74,7 +74,7 @@ export default function Navbar() {
             <span className="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">shopping_bag</span>
             <AnimatePresence>
               {totalItems > 0 && (
-                <motion.span 
+                <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   exit={{ scale: 0 }}
@@ -90,7 +90,7 @@ export default function Navbar() {
           <div className="relative hidden md:block">
             {user ? (
               <>
-                <button 
+                <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center gap-3 p-1 rounded-full border border-outline/10 hover:border-brand-accent/30 transition-all"
                 >
@@ -100,10 +100,10 @@ export default function Navbar() {
                     ) : (profile?.full_name?.charAt(0).toUpperCase() || 'U')}
                   </div>
                 </button>
-                
+
                 <AnimatePresence>
                   {isUserMenuOpen && (
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
@@ -115,29 +115,29 @@ export default function Navbar() {
                       </div>
                       <div className="h-[1px] bg-outline/5 mb-2 mx-4"></div>
                       <Link href="/profile" className="flex items-center gap-3 px-6 py-3 text-[9px] font-black text-secondary hover:text-brand-accent hover:bg-surface-container-low transition-all uppercase tracking-widest">
-                         <span className="material-symbols-outlined text-lg">person</span> Profile
+                        <span className="material-symbols-outlined text-lg">person</span> Profile
                       </Link>
                       <Link href="/profile" className="flex items-center gap-3 px-6 py-3 text-[9px] font-black text-secondary hover:text-brand-accent hover:bg-surface-container-low transition-all uppercase tracking-widest">
-                         <span className="material-symbols-outlined text-lg">history</span> Orders
+                        <span className="material-symbols-outlined text-lg">history</span> Orders
                       </Link>
                       {profile?.is_admin && (
                         <Link href="/admin" className="flex items-center gap-3 px-6 py-3 text-[9px] font-black text-primary hover:text-brand-accent hover:bg-surface-container-low transition-all uppercase tracking-widest border-t border-outline/5 mt-2 pt-4">
-                           <span className="material-symbols-outlined text-lg">admin_panel_settings</span> Exec Portal
+                          <span className="material-symbols-outlined text-lg">admin_panel_settings</span> Exec Portal
                         </Link>
                       )}
-                      <button 
+                      <button
                         onClick={handleLogout}
                         className="w-full flex items-center gap-3 px-6 py-3 text-[9px] font-black text-error/60 hover:text-error hover:bg-error/5 transition-all uppercase tracking-widest border-t border-outline/5 mt-2 pt-4"
                       >
-                         <span className="material-symbols-outlined text-lg">logout</span> Terminate Session
+                        <span className="material-symbols-outlined text-lg">logout</span> Terminate Session
                       </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </>
             ) : (
-              <Link 
-                href="/login" 
+              <Link
+                href="/login"
                 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary hover:text-brand-accent transition-colors flex items-center gap-2"
               >
                 Vault Access <span className="material-symbols-outlined text-lg">lock</span>
@@ -146,7 +146,7 @@ export default function Navbar() {
           </div>
 
           <div className="lg:hidden flex items-center">
-            <button 
+            <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 text-primary dark:text-white hover:bg-surface-container-low rounded-full transition-all"
             >
@@ -160,7 +160,7 @@ export default function Navbar() {
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -171,33 +171,33 @@ export default function Navbar() {
               <Link href="/products" className={`transition-colors ${isActive('/products') ? 'text-brand-accent' : 'text-secondary'}`}>Collection</Link>
               <Link href="/about" className={`transition-colors ${isActive('/about') ? 'text-brand-accent' : 'text-secondary'}`}>Legacy</Link>
               <Link href="/contact" className={`transition-colors ${isActive('/contact') ? 'text-brand-accent' : 'text-secondary'}`}>Contact</Link>
-              
+
               <div className="pt-8 border-t border-outline/10 flex flex-col gap-6">
-                 {user ? (
-                   <>
-                     <Link href="/profile" className="flex items-center gap-3 text-primary uppercase tracking-widest font-black text-[10px]">
-                        <span className="material-symbols-outlined text-lg">person</span> Profile Details
-                     </Link>
-                     <Link href="/profile" className="flex items-center gap-3 text-primary uppercase tracking-widest font-black text-[10px]">
-                        <span className="material-symbols-outlined text-lg">history</span> Procurement History
-                     </Link>
-                     {profile?.is_admin && (
-                        <Link href="/admin" className="flex items-center gap-3 text-brand-accent uppercase tracking-widest font-black text-[10px]">
-                          <span className="material-symbols-outlined text-lg">admin_panel_settings</span> Executive Portal
-                        </Link>
-                     )}
-                     <button 
-                       onClick={handleLogout}
-                       className="flex items-center gap-3 text-error uppercase tracking-widest font-black text-[10px] text-left"
-                     >
-                        <span className="material-symbols-outlined text-lg">logout</span> Terminate Session
-                     </button>
-                   </>
-                 ) : (
-                   <Link href="/login" className="flex items-center gap-3 text-primary uppercase tracking-widest font-black text-[10px]">
-                      <span className="material-symbols-outlined text-lg">lock</span> Member Vault Access
-                   </Link>
-                 )}
+                {user ? (
+                  <>
+                    <Link href="/profile" className="flex items-center gap-3 text-primary uppercase tracking-widest font-black text-[10px]">
+                      <span className="material-symbols-outlined text-lg">person</span> Profile Details
+                    </Link>
+                    <Link href="/profile" className="flex items-center gap-3 text-primary uppercase tracking-widest font-black text-[10px]">
+                      <span className="material-symbols-outlined text-lg">history</span> Procurement History
+                    </Link>
+                    {profile?.is_admin && (
+                      <Link href="/admin" className="flex items-center gap-3 text-brand-accent uppercase tracking-widest font-black text-[10px]">
+                        <span className="material-symbols-outlined text-lg">admin_panel_settings</span> Executive Portal
+                      </Link>
+                    )}
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-3 text-error uppercase tracking-widest font-black text-[10px] text-left"
+                    >
+                      <span className="material-symbols-outlined text-lg">logout</span> Terminate Session
+                    </button>
+                  </>
+                ) : (
+                  <Link href="/login" className="flex items-center gap-3 text-primary uppercase tracking-widest font-black text-[10px]">
+                    <span className="material-symbols-outlined text-lg">lock</span> Member Vault Access
+                  </Link>
+                )}
               </div>
             </div>
           </motion.div>
