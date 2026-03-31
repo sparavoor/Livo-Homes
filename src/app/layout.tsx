@@ -9,7 +9,8 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: 'sw
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: 'swap' });
 
 export const metadata: Metadata = {
-  title: "Livo Homes | Architectural Excellence",
+  title: "Livo Homes | Your Home, Your Style.
+",
   description: "Premium fixtures and architectural elements.",
 };
 

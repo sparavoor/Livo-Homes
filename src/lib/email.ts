@@ -53,7 +53,7 @@ export const getOrderEmailTemplate = (order: any, status: string) => {
 
       <p style="margin-top: 40px; font-size: 12px; color: #999;">If you have any questions, please contact our principal desk.</p>
       <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; font-size: 10px; color: #bbb; text-transform: uppercase;">
-        © 2026 Livo Homes | Architectural Excellence
+        © 2026 Livo Homes | Your Home, Your Style.
       </footer>
     </div>
   `;
