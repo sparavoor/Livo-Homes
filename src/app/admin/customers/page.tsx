@@ -44,8 +44,8 @@ export default function AdminCustomers() {
     setViewMode('orders');
     try {
       const contact = customer.isRegistered 
-        ? { userId: customer.id, email: customer.email }
-        : { email: customer.email };
+        ? { userId: customer.id, email: customer.email ?? undefined }
+        : { email: customer.email ?? undefined };
       const orders = await fetchCustomerOrdersAction(contact);
       setCustomerOrders(orders);
     } catch (err) {
