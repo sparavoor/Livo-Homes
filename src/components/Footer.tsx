@@ -27,10 +27,10 @@ export default function Footer() {
         </div>
         <div className="flex flex-col space-y-6">
           <h4 className="font-black text-primary uppercase tracking-[0.2em] text-[10px] mb-2">Collections</h4>
-          <Link className="text-slate-400 hover:text-primary transition-all font-light text-base" href="/category/closets">Closets</Link>
-          <Link className="text-slate-400 hover:text-primary transition-all font-light text-base" href="/category/wash-basin">Wash Basin</Link>
-          <Link className="text-slate-400 hover:text-primary transition-all font-light text-base" href="/category/faucets">Faucets</Link>
-          <Link className="text-slate-400 hover:text-primary transition-all font-light text-base" href="/category/shower">Shower</Link>
+          <Link className="text-slate-400 hover:text-primary transition-all font-light text-base" href="/category/Cat_6">Chrome Plated Fittings</Link>
+          <Link className="text-slate-400 hover:text-primary transition-all font-light text-base" href="/category/Cat_2">Home Accessories</Link>
+          <Link className="text-slate-400 hover:text-primary transition-all font-light text-base" href="/category/Cat_1">Royal Electrical</Link>
+          <Link className="text-slate-400 hover:text-primary transition-all font-light text-base" href="/category/Cat_12">Sanitaryware</Link>
         </div>
         <div className="flex flex-col space-y-6">
           <h4 className="font-black text-primary uppercase tracking-[0.2em] text-[10px] mb-2">Registry</h4>
