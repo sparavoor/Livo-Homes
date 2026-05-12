@@ -108,7 +108,7 @@ export default function SubCategoriesControl() {
                     </td>
                     <td className="px-8 py-6">
                       <span className="px-4 py-1 bg-background border border-outline/5 rounded-full text-[8px] font-black text-primary/60 uppercase tracking-[0.2em]">
-                        {sub.categoryName || 'Independent Segment'}
+                        {categories.find(c => c.id === sub.categoryId)?.name || 'Independent Segment'}
                       </span>
                     </td>
                     <td className="px-8 py-6">
