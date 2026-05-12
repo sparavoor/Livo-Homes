@@ -1,4 +1,5 @@
 'use client';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
@@ -8,13 +9,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { logout } = useAuth();
   const router = useRouter();
 
+  useEffect(() => {
+    // Basic admin authentication check
+    const isAdminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+    if (!isAdminLoggedIn && pathname !== '/admin/login') {
+      router.push('/admin/login');
+    }
+  }, [pathname, router]);
+
   const handleLogout = async () => {
     try {
+      localStorage.removeItem('adminLoggedIn');
       await logout();
-      window.location.href = '/';
+      window.location.href = '/admin/login';
     } catch (error) {
       console.error("Admin logout failed:", error);
-      window.location.href = '/';
+      window.location.href = '/admin/login';
     }
   };
 
@@ -29,6 +39,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Inquiries', path: '/admin/inquiries', icon: 'forum' },
     { name: 'Settings', path: '/admin/settings', icon: 'settings' },
   ];
+
+  // If we are on the login page, don't show the sidebar/header shell
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
 
   return (
     <div className="flex min-h-screen bg-background font-body text-primary antialiased">
