@@ -8,23 +8,23 @@ export default function SalesManagementPage() {
   const [activeTab, setActiveTab] = useState<'orders' | 'inquiries'>('orders');
 
   return (
-    <div className="min-h-screen bg-background font-body text-primary p-10 lg:p-16">
-      <header className="mb-16 pb-10 border-b border-outline/5">
+    <div className="min-h-screen bg-background font-body text-primary">
+      <header className="mb-8 lg:mb-16 pb-6 lg:pb-10 border-b border-outline/5">
         <div className="flex items-center gap-4 mb-3">
-          <div className="w-8 h-[1px] bg-brand-accent"></div>
-          <span className="text-brand-accent font-label text-[9px] font-black uppercase tracking-[0.4em]">Sales & Engagement Portal</span>
+          <div className="w-6 lg:w-8 h-[1px] bg-brand-accent"></div>
+          <span className="text-brand-accent font-label text-[8px] lg:text-[9px] font-black uppercase tracking-[0.4em]">Sales & Engagement Portal</span>
         </div>
-        <h1 className="font-headline text-4xl font-black text-primary tracking-tighter">
+        <h1 className="font-headline text-2xl lg:text-4xl font-black text-primary tracking-tighter">
           Managerial Control
         </h1>
       </header>
 
       <div className="space-y-10">
         {/* Tab Selection */}
-        <div className="flex gap-1 border-b border-outline/5">
+        <div className="flex gap-1 border-b border-outline/5 overflow-x-auto custom-scrollbar whitespace-nowrap">
           <button
             onClick={() => setActiveTab('orders')}
-            className={`px-8 py-5 text-[10px] font-black uppercase tracking-[0.4em] transition-all relative ${activeTab === 'orders' ? 'text-primary' : 'text-secondary/40 hover:text-primary/60'
+            className={`px-6 lg:px-8 py-4 lg:py-5 text-[9px] lg:text-[10px] font-black uppercase tracking-[0.4em] transition-all relative ${activeTab === 'orders' ? 'text-primary' : 'text-secondary/40 hover:text-primary/60'
               }`}
           >
             Orders
@@ -34,7 +34,7 @@ export default function SalesManagementPage() {
           </button>
           <button
             onClick={() => setActiveTab('inquiries')}
-            className={`px-8 py-5 text-[10px] font-black uppercase tracking-[0.4em] transition-all relative ${activeTab === 'inquiries' ? 'text-primary' : 'text-secondary/40 hover:text-primary/60'
+            className={`px-6 lg:px-8 py-4 lg:py-5 text-[9px] lg:text-[10px] font-black uppercase tracking-[0.4em] transition-all relative ${activeTab === 'inquiries' ? 'text-primary' : 'text-secondary/40 hover:text-primary/60'
               }`}
           >
             Inquiries
