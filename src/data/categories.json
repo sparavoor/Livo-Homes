@@ -1,0 +1,79 @@
+[
+  {
+    "id": "closets",
+    "name": "Closets",
+    "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuA_4ZMJCqcdzRVjSR4oPbc3i63TZo3gx6su1UwFLcGZDdKLqP7uWAIaLZIGQQJxsobdgJcWQEU6KbXUoR2AoO6zbvhXWHFNp3OQ688ztYhVVB7do0FXRmJAXyRqsqbXiLoqofXKlLczkvQEngZoNN3uYj33xMocBtcqzx5kK7-a1ztw7FlikDrC4gwpJv4gd6ksXyZseuM2nTmmGTklLvB93llNAnQPZNoYBMAtBTo8qmXC25_z3n6yu64z3V8xwqcNQomDHXU4akg",
+    "description": "Bespoke storage solutions and architectural wardrobes.",
+    "count": 1
+  },
+  {
+    "id": "wash-basin",
+    "name": "Wash Basin",
+    "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuDr6QBCGNhUxCejzeGst8Q5Dcl4YJhR5dsHmWbnrhmilEyEGRJAgD9uVxZvL7u060-RwItPvgzaa5dlq2Fijg4dIADjpR980NlGlMTQkWI4NCpmnloJQFb16BHxVJ3D49Ru-MA42Zdsz3ApaJwrDeWZ7AZ4t8bfwVt6hr6FGc0HW1qP3bCZAIYd7rjNaYpEYUYUdQwHOxiquCfx5o_If5rzMHDDdyUZAIgWH6e8hFtCePCrYwoZz_5ywEWiXEN5NJDGucctO1Z_MOM",
+    "description": "Sculpted vessels and monolith basins for modern vanities.",
+    "count": 1
+  },
+  {
+    "id": "faucets",
+    "name": "Faucets",
+    "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuDr8ZOGbykKA1ujwtaeS6CUtgyu6kTFYTd06L29-pzP2Co2-lTDsGyTULuZWAegaLIbWdLbr4a0is1Yz2Z2wT3zpsjYxxGK46_-htPC6f3wCE_RO8TiAOpgWEYBbgXATkXBnRWutVnbFUO9GQbV4bAAGltMUJpm7Pz81dQnYZWuwixaWttosdtvs_mnEryZMUXIOI7vsGvESNUZ5pD50-B7-T9hOX3jt1fVMltWuE4IewQqNMfgYcxd3adjq2mna3yF86NykP6IcLo",
+    "description": "Premium architectural faucets for modern homes.",
+    "count": 3
+  },
+  {
+    "id": "shower",
+    "name": "Shower",
+    "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuB6nrevQJS1XlMiEd8Svq-rT7cyz9TWjEoDefJiTMRM7Y2UMVOVFAlMxfQz7vSQQqUyR0z9Cpv8K1Pfy-KsDPHk0eOfdwMsUXUQ3a84Uv87k5yFVKYLKPRR5_hPwZsjupsS2A5jx7CwZ5jH7PQiccUB6rNuT9ljV85ixf5E85k2sOvhuvZZ3frpULCWcatCEL_KRCrRwK3mpJLBXznrvNeM8H78ea2FMT1LP4tFioT-tbosQ7mY4IkbOGx8QURBC7kXhIg1aMsutbo",
+    "description": "Immersive hydrotherapy systems with thermostatic control.",
+    "count": 2
+  },
+  {
+    "id": "accessories",
+    "name": "Accessories",
+    "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuAbEt9CFYBk5jAqIp-jhyC0bAA6zeuVryF_PePBtqo6pNC7-74OBjOS663wa-w2fBqS5aEktj37FJKxHN1wU9hWmy5PSGkw9_Q_goTuVmnISfRaSwUsbFPb6MBibqMKjeYG_0SjbC1GoXHyGwm_v9_OWSctopC98xqBJtiOdK74--xMuv-W8hvwayN8lAtY0jSSuPQDK-iqJGiHSMnU4JxTqyq6YPMR9Xn9d94bLmIXkTy7LFPuT9fDtauseEVBEJUANzSRcxDw5J0",
+    "description": "Premium bathroom hardware and designer accessories.",
+    "count": 0
+  },
+  {
+    "id": "kitchen-sink",
+    "name": "Kitchen Sink",
+    "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuBW8AwD5EQddoeRXDh5wGW5MdZfRGRmM3MAl0Bl00Rz-gSkTFdyB05SxcrKcYQNTfJTSEN0sXeIIMIYQO_iaPWzdYtfJDZ7rTN0K4Wl8u8Osaf2O43X17EplVB4zthP9vJ6BHlcx_6eMQElwm7uaIX2gtYhXBtQYoM5Jvwhdhagms4z4QPgbmEW6nckjIRMtAljftIG-oxLnhZHM8yc5tzYo-CIqcxS1UTeskEhHfpSBIrubiMJwc0aUsRRa16WDAYZCGclHLMJ_PM",
+    "description": "Stainless steel and composite sinks for modern kitchens.",
+    "count": 0
+  },
+  {
+    "id": "electrical",
+    "name": "Electrical",
+    "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuCRdVTKQYb-tEHHEl87mdV8HuOtoFSeHy_t6sImRR2couuowXiQC75I4p-7M_7VMM5UPEXWk-gY1EkAFcj48xhVBJpHyhDDWV9d8gXZQqq0xv4SCX_X7Y0mBZl-8xQBgVqt96JOm48fkp_aJcnk7dxAujvvNKMQKC-55Cc5R18pDBvpoFyN05hYbkEXBuK6KctCFvkZ93m98psWByzWDvcSX4g_vq50JlSREygpFs8cxUzPWq8a08FddIg0BZhRg8Pip53s0iJWMbo",
+    "description": "Modern switches, sockets, and smart home modules.",
+    "count": 0
+  },
+  {
+    "id": "drainers",
+    "name": "Drainers",
+    "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuBVWuVIGYRXcvT5XuXHC4qOFX44-VATw9Fa5NLBP78yewG_rBJf7SFFU0_whpf9FFzjblC9UPIWn2RIH0E5NQsVkRAt1uqrfaQT-4ge8cN5myevZBlF_Dvy7vkEob9UKOaBlbEMELxgKHJ0-gqGD3iKHx3b8skGpX1ZPMbk8iL0OdepHJkH2ljTUQAQulc31POvULW1gDfqdDS3zxyN7tyxh4QBNcmJoFW0gmHXMRMNUNetfAeR4EmJDCZ9mRke4c6cpp30J51vJSk",
+    "description": "Architectural floor drains and decorative gratings.",
+    "count": 0
+  },
+  {
+    "id": "ptmt",
+    "name": "PTMT",
+    "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuCJiRskQ0XY9BQ36pBRlIUvtfQgjFahERuTzXRgrLAfsJ8eiQy6FDwUada8Br2T3MoMjF4751f3-rc_THMkzpYY0iT1rCiloC7fGsR1ywBgV0Ui75IzsUujSohcJIuK5Q7xi2ag8mEy4MIUNr8y5-X0x1dguNqkkvG0eXB46n_wH5ozPGENo5OiuWdzEJ-UnAVRFwONZAEjk_AEgP7buC6GlIrhD1MrwiSiaRnRL5EiYK9bcYr7zqZ1HdB3oZXCNOJBT-oBOpsBvqs",
+    "description": "Durable PTMT fittings for high-utility areas.",
+    "count": 1
+  },
+  {
+    "id": "flushing",
+    "name": "Flushing",
+    "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuAAkIfRIl3IS9b-jHR6gg1KcL-LlFLHSH5Z05luw7h0E5Zyc5Qeg6Xp5IjJE06N_oU4q_q1cPLuTVP8XzDrE8EL-55KalUxBvPdoPbZTcKULwQfvVeQiqsEl5_fdz3cpi-kGXovuBTQNZr2pnS01QkLYbC9bcKs5ZMrOrWywQaURkuixkoHlzLcJFwjbibuPM9THT4lXnr5zLzpg7mmNyY5V6YbD2HL1lJDfWP58I7lQqPAQh3g2LPLn08mhyw3VmZ5Ke6eFvcHXdc",
+    "description": "Concealed cisterns and elegant flushing mechanisms.",
+    "count": 0
+  },
+  {
+    "id": "smart-mirrors",
+    "name": "Smart Mirrors",
+    "description": "Intelligent mirrors with integrated lighting and anti-fog technology.",
+    "image": "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop",
+    "count": 0
+  }
+]
