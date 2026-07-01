@@ -41,8 +41,8 @@ export default async function Home() {
           </Link>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
-          {categories.slice(0, 8).map((cat: Category, index: number) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-12">
+          {categories.slice(0, 5).map((cat: Category, index: number) => (
             <MotionItem key={cat.id} delay={index * 0.1}>
               <CategoryCard 
                 title={cat.name} 
