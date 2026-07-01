@@ -3,6 +3,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { motion } from 'framer-motion';
+import { FEATURES } from '@/lib/features';
+import { getWhatsAppLink, getProductInquiryMessage } from '@/lib/whatsapp';
 
 export default function ProductCard({ 
   name, 
@@ -56,15 +58,17 @@ export default function ProductCard({
         )}
 
         {/* Quick Add Overlay */}
-        <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 flex items-center justify-center pointer-events-none">
-           <button 
-            onClick={handleAddToCart}
-            className="pointer-events-auto transform translate-y-4 group-hover:translate-y-0 transition-transform duration-700 bg-white text-primary p-4 rounded-full shadow-2xl hover:bg-brand-accent hover:text-white"
-            title="Add to Manifesto"
-           >
-             <span className="material-symbols-outlined text-2xl font-light">add_shopping_cart</span>
-           </button>
-        </div>
+        {FEATURES.enableOrdering && (
+          <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 flex items-center justify-center pointer-events-none">
+             <button 
+              onClick={handleAddToCart}
+              className="pointer-events-auto transform translate-y-4 group-hover:translate-y-0 transition-transform duration-700 bg-white text-primary p-4 rounded-full shadow-2xl hover:bg-brand-accent hover:text-white"
+              title="Add to Manifesto"
+             >
+               <span className="material-symbols-outlined text-2xl font-light">add_shopping_cart</span>
+             </button>
+          </div>
+        )}
       </Link>
 
       <div className="p-6 flex flex-col flex-1">
@@ -84,12 +88,22 @@ export default function ProductCard({
           </Link>
         </h4>
         
-        <button 
-          onClick={handleAddToCart}
-          className="w-full border border-outline/10 text-primary py-3 flex items-center justify-center font-headline font-black text-[8px] uppercase tracking-[0.3em] hover:bg-primary hover:text-white transition-all duration-500 rounded-sm"
-        >
-          Add to Selection
-        </button>
+        {FEATURES.enableOrdering ? (
+          <button 
+            onClick={handleAddToCart}
+            className="w-full border border-outline/10 text-primary py-3 flex items-center justify-center font-headline font-black text-[8px] uppercase tracking-[0.3em] hover:bg-primary hover:text-white transition-all duration-500 rounded-sm"
+          >
+            Add to Selection
+          </button>
+        ) : (
+          <Link 
+            href={getWhatsAppLink(getProductInquiryMessage(name, price, id.toString()))}
+            target="_blank"
+            className="w-full border border-outline/10 text-primary py-3 flex items-center justify-center font-headline font-black text-[8px] uppercase tracking-[0.3em] hover:bg-primary hover:text-white transition-all duration-500 rounded-sm text-center"
+          >
+            Inquiry
+          </Link>
+        )}
       </div>
     </div>
   );
