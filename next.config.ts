@@ -28,6 +28,8 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'respite.co.in' },
       { protocol: 'https', hostname: 'rnvalves.com' },
       { protocol: 'https', hostname: 'carysil.com' },
+      { protocol: 'https', hostname: 'pearlprecisionproducts.com' },
+      { protocol: 'https', hostname: 'webpearl.s3.ap-south-1.amazonaws.com' },
     ],
   },
   experimental: {
