@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/auth-context';
 import { useCart } from '@/context/CartContext';
 
+import { FEATURES } from '@/lib/features';
+
 export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -70,21 +72,23 @@ export default function Navbar() {
           </form>
 
           {/* Cart Icon */}
-          <Link href="/cart" className="relative p-2 text-primary dark:text-white hover:text-brand-accent transition-colors group">
-            <span className="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">shopping_bag</span>
-            <AnimatePresence>
-              {totalItems > 0 && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                  className="absolute top-1 right-1 w-4 h-4 bg-brand-accent text-white rounded-full flex items-center justify-center text-[8px] font-black"
-                >
-                  {totalItems}
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </Link>
+          {FEATURES.enableOrdering && (
+            <Link href="/cart" className="relative p-2 text-primary dark:text-white hover:text-brand-accent transition-colors group">
+              <span className="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">shopping_bag</span>
+              <AnimatePresence>
+                {totalItems > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    className="absolute top-1 right-1 w-4 h-4 bg-brand-accent text-white rounded-full flex items-center justify-center text-[8px] font-black"
+                  >
+                    {totalItems}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Link>
+          )}
 
           {/* User Profile / Login */}
           <div className="relative hidden md:block">

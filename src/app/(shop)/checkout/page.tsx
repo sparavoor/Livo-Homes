@@ -9,6 +9,7 @@ import { createOrder } from '@/lib/orders';
 import { getUserAddresses, addUserAddress, UserAddress } from '@/lib/addresses';
 import Link from 'next/link';
 import indianStatesData from '@/data/indian-states.json';
+import { FEATURES } from '@/lib/features';
 
 const STATES = indianStatesData.states.map(s => s.state);
 const DISTRICTS: Record<string, string[]> = indianStatesData.states.reduce((acc, curr) => {
@@ -48,6 +49,10 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
+    if (!FEATURES.enableOrdering) {
+      router.push('/products');
+      return;
+    }
     // Only redirect if cart is empty AND we ARE NOT in the middle of a successful order processing
     if (items.length === 0 && !isProcessing && !isProcessingSuccess && step < 3) {
       router.push('/products');

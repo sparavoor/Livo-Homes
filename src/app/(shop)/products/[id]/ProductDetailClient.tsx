@@ -8,6 +8,7 @@ import MotionSection from '@/components/MotionSection';
 import MotionItem from '@/components/MotionItem';
 import ProductCard from '@/components/ProductCard';
 import { useCart } from '@/context/CartContext';
+import { FEATURES } from '@/lib/features';
 
 interface ProductDetailClientProps {
   product: Product;
@@ -148,18 +149,24 @@ export default function ProductDetailClient({ product, relatedProducts, categori
           </MotionSection>
 
           <MotionSection delay={0.4} className="mt-12 space-y-4">
-            <button 
-              onClick={handleAddToCart}
-              disabled={product.availability !== 'In Stock'}
-              className="w-full bg-primary text-white py-5 rounded-sm lg:rounded-md font-body text-sm uppercase tracking-[0.2em] hover:bg-primary/90 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
-            >
-              Add to Cart
-            </button>
+            {FEATURES.enableOrdering && (
+              <button 
+                onClick={handleAddToCart}
+                disabled={product.availability !== 'In Stock'}
+                className="w-full bg-primary text-white py-5 rounded-sm lg:rounded-md font-body text-sm uppercase tracking-[0.2em] hover:bg-primary/90 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                Add to Cart
+              </button>
+            )}
             
             <Link 
               href={getWhatsAppLink(getProductInquiryMessage(product.name, product.price, product.id))}
               target="_blank"
-              className="w-full flex items-center justify-center gap-3 border border-outline text-primary py-5 rounded-sm lg:rounded-md font-body text-sm uppercase tracking-[0.2em] hover:bg-surface-container-low transition-all"
+              className={`w-full flex items-center justify-center gap-3 py-5 rounded-sm lg:rounded-md font-body text-sm uppercase tracking-[0.2em] transition-all ${
+                FEATURES.enableOrdering
+                  ? 'border border-outline text-primary hover:bg-surface-container-low'
+                  : 'bg-primary text-white hover:bg-primary/90 hover:shadow-lg'
+              }`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" /><path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1Z"/><path d="M14 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1Z"/><path d="M9 15a.5.5 0 0 0 1 0v-1a.5.5 0 0 0-1 0v1Z"/><path d="M14 15a.5.5 0 0 0 1 0v-1a.5.5 0 0 0-1 0v1Z"/></svg>
               Enquire

@@ -6,6 +6,7 @@ import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
+import { FEATURES } from '@/lib/features';
 
 function RegisterContent() {
   const { loginWithGoogle, sendOtp, verifyOtp } = useAuth();
@@ -21,7 +22,10 @@ function RegisterContent() {
 
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+    if (!FEATURES.enableUserRegistration) {
+      router.push('/login');
+    }
+  }, [router]);
 
   const showError = (msg: string) => {
     setError(msg);

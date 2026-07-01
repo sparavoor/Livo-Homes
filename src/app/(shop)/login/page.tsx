@@ -6,6 +6,7 @@ import { useAuth } from '@/context/auth-context';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
+import { FEATURES } from '@/lib/features';
 
 function LoginContent() {
   const { user, loginWithGoogle, sendOtp, verifyOtp } = useAuth();
@@ -233,11 +234,13 @@ function LoginContent() {
           Google Identity
         </button>
 
-        <div className="mt-12 pt-8 border-t border-outline/5 text-center">
-          <p className="text-secondary/40 text-[9px] font-black uppercase tracking-[0.2em]">
-            Need architectural access? <Link href="/register" className="text-brand-accent ml-2 hover:underline">Register Account</Link>
-          </p>
-        </div>
+        {FEATURES.enableUserRegistration && (
+          <div className="mt-12 pt-8 border-t border-outline/5 text-center">
+            <p className="text-secondary/40 text-[9px] font-black uppercase tracking-[0.2em]">
+              Need architectural access? <Link href="/register" className="text-brand-accent ml-2 hover:underline">Register Account</Link>
+            </p>
+          </div>
+        )}
       </motion.div>
     </div>
   );

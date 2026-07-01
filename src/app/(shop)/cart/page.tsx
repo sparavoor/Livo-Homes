@@ -1,11 +1,21 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FEATURES } from '@/lib/features';
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, subtotal, totalItems } = useCart();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!FEATURES.enableOrdering) {
+      router.push('/products');
+    }
+  }, [router]);
 
   return (
     <div className="bg-background min-h-screen pt-40 pb-24 px-6 md:px-12 max-w-[1440px] mx-auto">
