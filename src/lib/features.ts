@@ -10,4 +10,8 @@ export const FEATURES = {
   // Toggle user account registration
   // Set to true to show sign-up links, or false to hide registration.
   enableUserRegistration: false,
+
+  // Toggle user account login/profile access (Vault Access in Navbar)
+  // Set to true to allow user logins/profiles, or false to hide them.
+  enableUserAccounts: false,
 };

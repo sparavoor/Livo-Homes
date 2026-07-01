@@ -91,63 +91,69 @@ export default function Navbar() {
           )}
 
           {/* User Profile / Login */}
-          <div className="relative hidden md:block">
-            {user ? (
-              <>
-                <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center gap-3 p-1 rounded-full border border-outline/10 hover:border-brand-accent/30 transition-all"
-                >
-                  <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-black overflow-hidden">
-                    {profile?.avatar_url ? (
-                      <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-                    ) : (profile?.full_name?.charAt(0).toUpperCase() || 'U')}
-                  </div>
-                </button>
+          {(FEATURES.enableUserAccounts || (user && profile?.is_admin)) && (
+            <div className="relative hidden md:block">
+              {user ? (
+                <>
+                  <button
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="flex items-center gap-3 p-1 rounded-full border border-outline/10 hover:border-brand-accent/30 transition-all"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-black overflow-hidden">
+                      {profile?.avatar_url ? (
+                        <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                      ) : (profile?.full_name?.charAt(0).toUpperCase() || 'U')}
+                    </div>
+                  </button>
 
-                <AnimatePresence>
-                  {isUserMenuOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-4 w-56 bg-white border border-outline/10 shadow-2xl py-4 z-50 overflow-hidden"
-                    >
-                      <div className="px-6 py-2 mb-4">
-                        <p className="text-[10px] font-black text-primary uppercase tracking-tighter truncate">{profile?.full_name}</p>
-                        <p className="text-[8px] font-bold text-secondary/40 uppercase tracking-widest truncate">{profile?.email || profile?.phone}</p>
-                      </div>
-                      <div className="h-[1px] bg-outline/5 mb-2 mx-4"></div>
-                      <Link href="/profile" className="flex items-center gap-3 px-6 py-3 text-[9px] font-black text-secondary hover:text-brand-accent hover:bg-surface-container-low transition-all uppercase tracking-widest">
-                        <span className="material-symbols-outlined text-lg">person</span> Profile
-                      </Link>
-                      <Link href="/profile" className="flex items-center gap-3 px-6 py-3 text-[9px] font-black text-secondary hover:text-brand-accent hover:bg-surface-container-low transition-all uppercase tracking-widest">
-                        <span className="material-symbols-outlined text-lg">history</span> Orders
-                      </Link>
-                      {profile?.is_admin && (
-                        <Link href="/admin" className="flex items-center gap-3 px-6 py-3 text-[9px] font-black text-primary hover:text-brand-accent hover:bg-surface-container-low transition-all uppercase tracking-widest border-t border-outline/5 mt-2 pt-4">
-                          <span className="material-symbols-outlined text-lg">admin_panel_settings</span> Exec Portal
-                        </Link>
-                      )}
-                      <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-6 py-3 text-[9px] font-black text-error/60 hover:text-error hover:bg-error/5 transition-all uppercase tracking-widest border-t border-outline/5 mt-2 pt-4"
+                  <AnimatePresence>
+                    {isUserMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute right-0 mt-4 w-56 bg-white border border-outline/10 shadow-2xl py-4 z-50 overflow-hidden"
                       >
-                        <span className="material-symbols-outlined text-lg">logout</span> Terminate Session
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </>
-            ) : (
-              <Link
-                href="/login"
-                className="text-[10px] font-black uppercase tracking-[0.3em] text-primary hover:text-brand-accent transition-colors flex items-center gap-2"
-              >
-                Vault Access <span className="material-symbols-outlined text-lg">lock</span>
-              </Link>
-            )}
-          </div>
+                        <div className="px-6 py-2 mb-4">
+                          <p className="text-[10px] font-black text-primary uppercase tracking-tighter truncate">{profile?.full_name}</p>
+                          <p className="text-[8px] font-bold text-secondary/40 uppercase tracking-widest truncate">{profile?.email || profile?.phone}</p>
+                        </div>
+                        <div className="h-[1px] bg-outline/5 mb-2 mx-4"></div>
+                        {FEATURES.enableOrdering && (
+                          <>
+                            <Link href="/profile" className="flex items-center gap-3 px-6 py-3 text-[9px] font-black text-secondary hover:text-brand-accent hover:bg-surface-container-low transition-all uppercase tracking-widest">
+                              <span className="material-symbols-outlined text-lg">person</span> Profile
+                            </Link>
+                            <Link href="/profile" className="flex items-center gap-3 px-6 py-3 text-[9px] font-black text-secondary hover:text-brand-accent hover:bg-surface-container-low transition-all uppercase tracking-widest">
+                              <span className="material-symbols-outlined text-lg">history</span> Orders
+                            </Link>
+                          </>
+                        )}
+                        {profile?.is_admin && (
+                          <Link href="/admin" className="flex items-center gap-3 px-6 py-3 text-[9px] font-black text-primary hover:text-brand-accent hover:bg-surface-container-low transition-all uppercase tracking-widest border-t border-outline/5 mt-2 pt-4">
+                            <span className="material-symbols-outlined text-lg">admin_panel_settings</span> Exec Portal
+                          </Link>
+                        )}
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-3 px-6 py-3 text-[9px] font-black text-error/60 hover:text-error hover:bg-error/5 transition-all uppercase tracking-widest border-t border-outline/5 mt-2 pt-4"
+                        >
+                          <span className="material-symbols-outlined text-lg">logout</span> Terminate Session
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </>
+              ) : (
+                <Link
+                  href="/login"
+                  className="text-[10px] font-black uppercase tracking-[0.3em] text-primary hover:text-brand-accent transition-colors flex items-center gap-2"
+                >
+                  Vault Access <span className="material-symbols-outlined text-lg">lock</span>
+                </Link>
+              )}
+            </div>
+          )}
 
           <div className="lg:hidden flex items-center">
             <button
@@ -176,33 +182,39 @@ export default function Navbar() {
               <Link href="/about" className={`transition-colors ${isActive('/about') ? 'text-brand-accent' : 'text-secondary'}`}>Legacy</Link>
               <Link href="/contact" className={`transition-colors ${isActive('/contact') ? 'text-brand-accent' : 'text-secondary'}`}>Contact</Link>
 
-              <div className="pt-8 border-t border-outline/10 flex flex-col gap-6">
-                {user ? (
-                  <>
-                    <Link href="/profile" className="flex items-center gap-3 text-primary uppercase tracking-widest font-black text-[10px]">
-                      <span className="material-symbols-outlined text-lg">person</span> Profile Details
+              {(FEATURES.enableUserAccounts || (user && profile?.is_admin)) && (
+                <div className="pt-8 border-t border-outline/10 flex flex-col gap-6">
+                  {user ? (
+                    <>
+                      {FEATURES.enableOrdering && (
+                        <>
+                          <Link href="/profile" className="flex items-center gap-3 text-primary uppercase tracking-widest font-black text-[10px]">
+                            <span className="material-symbols-outlined text-lg">person</span> Profile Details
+                          </Link>
+                          <Link href="/profile" className="flex items-center gap-3 text-primary uppercase tracking-widest font-black text-[10px]">
+                            <span className="material-symbols-outlined text-lg">history</span> Procurement History
+                          </Link>
+                        </>
+                      )}
+                      {profile?.is_admin && (
+                        <Link href="/admin" className="flex items-center gap-3 text-brand-accent uppercase tracking-widest font-black text-[10px]">
+                          <span className="material-symbols-outlined text-lg">admin_panel_settings</span> Executive Portal
+                        </Link>
+                      )}
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-3 text-error uppercase tracking-widest font-black text-[10px] text-left"
+                      >
+                        <span className="material-symbols-outlined text-lg">logout</span> Terminate Session
+                      </button>
+                    </>
+                  ) : (
+                    <Link href="/login" className="flex items-center gap-3 text-primary uppercase tracking-widest font-black text-[10px]">
+                      <span className="material-symbols-outlined text-lg">lock</span> Member Vault Access
                     </Link>
-                    <Link href="/profile" className="flex items-center gap-3 text-primary uppercase tracking-widest font-black text-[10px]">
-                      <span className="material-symbols-outlined text-lg">history</span> Procurement History
-                    </Link>
-                    {profile?.is_admin && (
-                      <Link href="/admin" className="flex items-center gap-3 text-brand-accent uppercase tracking-widest font-black text-[10px]">
-                        <span className="material-symbols-outlined text-lg">admin_panel_settings</span> Executive Portal
-                      </Link>
-                    )}
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center gap-3 text-error uppercase tracking-widest font-black text-[10px] text-left"
-                    >
-                      <span className="material-symbols-outlined text-lg">logout</span> Terminate Session
-                    </button>
-                  </>
-                ) : (
-                  <Link href="/login" className="flex items-center gap-3 text-primary uppercase tracking-widest font-black text-[10px]">
-                    <span className="material-symbols-outlined text-lg">lock</span> Member Vault Access
-                  </Link>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </div>
           </motion.div>
         )}
