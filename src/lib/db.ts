@@ -327,7 +327,8 @@ export async function saveCategories(categories: Category[]): Promise<void> {
 export async function addCategory(category: Omit<Category, 'id' | 'count'>): Promise<Category> {
   if (supabaseAdmin) {
     const timestamp = Date.now().toString(36).substr(-4);
-    const id = `${category.name.toLowerCase().replace(/\s+/g, '-')}-${timestamp}`;
+    const slug = category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    const id = `${slug}-${timestamp}`;
     
     try {
       const { data, error } = await supabaseAdmin
@@ -357,9 +358,10 @@ export async function addCategory(category: Omit<Category, 'id' | 'count'>): Pro
   }
 
   const categories = await getCategories();
+  const slug = category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   const newCategory = {
     ...category,
-    id: category.name.toLowerCase().replace(/\s+/g, '-') + '-' + Math.random().toString(36).substr(2, 5),
+    id: slug + '-' + Math.random().toString(36).substr(2, 5),
     count: 0
   };
   categories.push(newCategory);
@@ -495,7 +497,8 @@ export async function saveSubcategories(subcategories: Subcategory[]): Promise<v
 export async function addSubcategory(subcategory: Omit<Subcategory, 'id' | 'count'>): Promise<Subcategory> {
   if (supabaseAdmin) {
     const timestamp = Date.now().toString(36).substr(-4);
-    const id = `${subcategory.name.toLowerCase().replace(/\s+/g, '-')}-${timestamp}`;
+    const slug = subcategory.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    const id = `${slug}-${timestamp}`;
     
     try {
       const { data, error } = await supabaseAdmin
@@ -527,9 +530,10 @@ export async function addSubcategory(subcategory: Omit<Subcategory, 'id' | 'coun
   }
 
   const subcategories = await getSubcategories();
+  const slug = subcategory.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   const newSubcategory = {
     ...subcategory,
-    id: subcategory.name.toLowerCase().replace(/\s+/g, '-') + '-' + Math.random().toString(36).substr(2, 5),
+    id: slug + '-' + Math.random().toString(36).substr(2, 5),
     count: 0
   };
   subcategories.push(newSubcategory);
