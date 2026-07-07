@@ -4,7 +4,8 @@ export default function AboutPage() {
   return (
     <div className="container mx-auto px-8 py-24 pt-32 max-w-4xl">
       <span className="text-primary uppercase tracking-[0.3em] font-label text-xs">Our Heritage</span>
-      <h1 className="text-5xl font-headline font-extrabold text-on-surface tracking-tight mt-4 mb-12">Livo: Your Home, Your Style
+      <h1 className="text-5xl font-headline font-extrabold text-on-surface tracking-tight mt-4 mb-12">LIVO_The Art of Living Well
+
       </h1>
 
       <div className="bg-surface-container-lowest rounded-2xl p-10 border border-outline-variant/30 shadow-sm mb-12 relative overflow-hidden">
