@@ -19,7 +19,7 @@ export default function ProductCard({
   name: string, 
   price: number, 
   originalPrice?: number, 
-  category?: string, 
+  category?: string | null, 
   image: string, 
   description?: string,
   isNew?: boolean, 

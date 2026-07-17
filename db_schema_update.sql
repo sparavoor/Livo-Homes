@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS products (
   is_new BOOLEAN DEFAULT true,
   is_bestseller BOOLEAN DEFAULT false,
   is_signature_masterpiece BOOLEAN DEFAULT false,
+  is_special BOOLEAN NOT NULL DEFAULT false,
   material TEXT,
   color TEXT,
   size TEXT,

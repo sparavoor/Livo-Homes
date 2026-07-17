@@ -13,6 +13,7 @@ export async function createProductAction(formData: FormData) {
   const description = formData.get('description') as string;
   const stock = parseInt(formData.get('stock') as string) || 0;
   const isSignatureMasterpiece = formData.get('isSignatureMasterpiece') === 'on';
+  const isSpecial = formData.get('isSpecial') === 'on';
   const material = formData.get('material') as string;
   const color = formData.get('color') as string;
   const size = formData.get('size') as string;
@@ -28,8 +29,8 @@ export async function createProductAction(formData: FormData) {
 
   await addProduct({
     name,
-    category,
-    subcategory,
+    category: isSpecial ? null : (category || null),
+    subcategory: isSpecial ? null : (subcategory || null),
     price,
     originalPrice,
     description,
@@ -38,6 +39,7 @@ export async function createProductAction(formData: FormData) {
     stock,
     isNew: true,
     isSignatureMasterpiece,
+    isSpecial,
     material,
     color,
     size,
@@ -58,6 +60,7 @@ export async function updateProductAction(id: string, formData: FormData) {
   const description = formData.get('description') as string;
   const stock = parseInt(formData.get('stock') as string) || 0;
   const isSignatureMasterpiece = formData.get('isSignatureMasterpiece') === 'on';
+  const isSpecial = formData.get('isSpecial') === 'on';
   const material = formData.get('material') as string;
   const color = formData.get('color') as string;
   const size = formData.get('size') as string;
@@ -80,8 +83,8 @@ export async function updateProductAction(id: string, formData: FormData) {
 
   await updateProduct(id, {
     name,
-    category,
-    subcategory,
+    category: isSpecial ? null : (category || null),
+    subcategory: isSpecial ? null : (subcategory || null),
     price,
     originalPrice,
     description,
@@ -89,6 +92,7 @@ export async function updateProductAction(id: string, formData: FormData) {
     images: finalImages,
     stock,
     isSignatureMasterpiece,
+    isSpecial,
     material,
     color,
     size,

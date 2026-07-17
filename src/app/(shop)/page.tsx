@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getProducts, getCategories, getBanners, getSignatureMasterpieces, getRecentProducts, Product, Category, Banner } from '@/lib/db';
+import { getProducts, getCategories, getBanners, getSignatureMasterpieces, getRecentProducts, getSpecialProducts, Product, Category, Banner } from '@/lib/db';
 import { getWhatsAppLink, DEFAULT_INQUIRY_MESSAGE } from '@/lib/whatsapp';
 import MotionSection from '@/components/MotionSection';
 import MotionItem from '@/components/MotionItem';
@@ -8,11 +8,12 @@ import CategoryCard from '@/components/CategoryCard';
 import HeroSlider from '@/components/HeroSlider';
 
 export default async function Home() {
-  const [signatureMasterpieces, recentlyAdded, categories, banners] = await Promise.all([
+  const [signatureMasterpieces, recentlyAdded, categories, banners, specialProducts] = await Promise.all([
     getSignatureMasterpieces(8),
     getRecentProducts(8),
     getCategories(),
-    getBanners()
+    getBanners(),
+    getSpecialProducts(8)
   ]);
   const latestProduct = recentlyAdded[0];
 
@@ -104,6 +105,36 @@ export default async function Home() {
           ))}
         </div>
       </section>
+
+      {/* 5.5 Exclusive Releases Section */}
+      {specialProducts.length > 0 && (
+        <section className="bg-white border-y border-outline/5 py-48 px-10">
+          <div className="max-w-[1440px] mx-auto">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-32 gap-12">
+              <div className="max-w-2xl">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-8 h-[1px] bg-brand-accent"></div>
+                  <span className="font-label text-brand-accent text-[10px] tracking-[0.4em] font-black uppercase block">Limited Editions</span>
+                </div>
+                <h2 className="font-headline text-5xl md:text-6xl font-black text-primary tracking-tight leading-tight">
+                  Exclusive Creations.
+                </h2>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 md:gap-16">
+              {specialProducts.map((product: Product, index: number) => (
+                <MotionItem key={product.id} delay={index * 0.1}>
+                  <ProductCard 
+                    {...product} 
+                    category={product.isSpecial ? "Special Release" : product.category || ""}
+                  />
+                </MotionItem>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* 6. Why Choose LIVO? (Light Clean Section) */}
       <section className="bg-surface-container-low/40 border-y border-outline/5 py-48 px-10">

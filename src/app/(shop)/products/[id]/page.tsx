@@ -16,8 +16,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     notFound();
   }
 
-  // Related products (same category, different ID)
-  const relatedProducts = products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
+  // Related products
+  const relatedProducts = product.isSpecial
+    ? products.filter(p => p.isSpecial && p.id !== product.id).slice(0, 4)
+    : products.filter(p => !p.isSpecial && p.category === product.category && p.id !== product.id).slice(0, 4);
 
   return (
     <div className="pt-28 pb-20 px-6 md:px-12 max-w-[1440px] mx-auto min-h-screen">

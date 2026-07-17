@@ -16,6 +16,7 @@ export default function ProductsControl() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [formSelectedCategory, setFormSelectedCategory] = useState('');
+  const [formIsSpecial, setFormIsSpecial] = useState(false);
   const [imagesToKeep, setImagesToKeep] = useState<string[]>([]);
   const [previewImages, setPreviewImages] = useState<string[]>([]);
 
@@ -62,6 +63,10 @@ export default function ProductsControl() {
         await createProductAction(formData);
       }
       setEditingProduct(null);
+      setPreviewImages([]);
+      setImagesToKeep([]);
+      setFormSelectedCategory('');
+      setFormIsSpecial(false);
       setActiveTab('list');
     } catch (error) {
       console.error('Failed to save product:', error);
@@ -71,7 +76,8 @@ export default function ProductsControl() {
 
   function handleEdit(product: Product) {
     setEditingProduct(product);
-    setFormSelectedCategory(product.category);
+    setFormSelectedCategory(product.category || '');
+    setFormIsSpecial(!!product.isSpecial);
     setImagesToKeep(product.images || [product.image]);
     setActiveTab('add');
   }
@@ -117,7 +123,7 @@ export default function ProductsControl() {
             Catalog
           </button>
           <button 
-            onClick={() => { setEditingProduct(null); setImagesToKeep([]); setPreviewImages([]); setFormSelectedCategory(''); setActiveTab('add'); }} 
+            onClick={() => { setEditingProduct(null); setImagesToKeep([]); setPreviewImages([]); setFormSelectedCategory(''); setFormIsSpecial(false); setActiveTab('add'); }} 
             className={`px-6 py-2.5 rounded-sm font-black text-[9px] uppercase tracking-[0.2em] transition-all ${activeTab === 'add' ? 'bg-primary text-white shadow-xl' : 'text-secondary/40 hover:text-primary'}`}
           >
             Register Asset
@@ -182,7 +188,7 @@ export default function ProductsControl() {
                     <td className="px-8 py-6">
                       <div className="flex flex-col gap-1">
                         <span className="px-3 py-1 bg-primary/5 text-primary/60 border border-primary/5 rounded-full text-[8px] font-black uppercase tracking-[0.2em] w-fit">
-                          {product.category}
+                          {product.isSpecial ? 'Special Product' : (product.category || 'None')}
                         </span>
                         {product.subcategory && (
                           <span className="px-3 py-0.5 bg-brand-accent/5 text-brand-accent/70 border border-brand-accent/10 rounded-full text-[7px] font-black uppercase tracking-[0.2em] w-fit ml-2">
@@ -198,6 +204,7 @@ export default function ProductsControl() {
                           {product.stock} Units
                         </span>
                         {product.isSignatureMasterpiece && <span className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-[7px] font-black uppercase tracking-[0.2em] w-fit border border-amber-100">Signature</span>}
+                        {product.isSpecial && <span className="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-[7px] font-black uppercase tracking-[0.2em] w-fit border border-purple-100">Special</span>}
                       </div>
                     </td>
                     <td className="px-8 py-6 text-right space-x-4">
@@ -229,13 +236,16 @@ export default function ProductsControl() {
                 <input name="name" required type="text" defaultValue={editingProduct?.name} placeholder="e.g. Helios Matte Monochrome" className="w-full bg-background border border-outline/5 focus:ring-1 focus:ring-brand-accent/20 focus:border-brand-accent/40 rounded-sm px-5 py-4 text-xs font-bold transition-all outline-none" />
               </div>
               <div>
-                <label className="block font-black text-primary/40 text-[8px] uppercase tracking-[0.4em] mb-4">Collection Assignment</label>
+                <label className="block font-black text-primary/40 text-[8px] uppercase tracking-[0.4em] mb-4">
+                  Collection Assignment {formIsSpecial ? '(Optional)' : '(Required)'}
+                </label>
                 <select 
                   name="category" 
-                  required 
-                  value={formSelectedCategory}
+                  required={!formIsSpecial} 
+                  disabled={formIsSpecial}
+                  value={formIsSpecial ? '' : formSelectedCategory}
                   onChange={(e) => setFormSelectedCategory(e.target.value)}
-                  className="w-full bg-background border border-outline/5 focus:ring-1 focus:ring-brand-accent/20 focus:border-brand-accent/40 rounded-sm px-5 py-4 text-xs font-black uppercase tracking-widest transition-all outline-none cursor-pointer appearance-none"
+                  className="w-full bg-background border border-outline/5 focus:ring-1 focus:ring-brand-accent/20 focus:border-brand-accent/40 rounded-sm px-5 py-4 text-xs font-black uppercase tracking-widest transition-all outline-none cursor-pointer appearance-none disabled:opacity-50"
                 >
                   <option value="">Assign Collection</option>
                   {categories.map((cat: Category) => (
@@ -247,7 +257,7 @@ export default function ProductsControl() {
                 <label className="block font-black text-primary/40 text-[8px] uppercase tracking-[0.4em] mb-4">Segment Specialization</label>
                 <select 
                   name="subcategory" 
-                  defaultValue={editingProduct?.subcategory}
+                  defaultValue={editingProduct?.subcategory || ''}
                   className="w-full bg-background border border-outline/5 focus:ring-1 focus:ring-brand-accent/20 focus:border-brand-accent/40 rounded-sm px-5 py-4 text-xs font-black uppercase tracking-widest transition-all outline-none cursor-pointer appearance-none"
                   disabled={!formSelectedCategory}
                 >
@@ -293,6 +303,17 @@ export default function ProductsControl() {
                   className="w-4 h-4 rounded-sm border-outline/20 text-primary focus:ring-brand-accent/20 transition-all cursor-pointer" 
                 />
                 <label htmlFor="isSignatureMasterpiece" className="font-black text-primary/60 text-[8px] uppercase tracking-[0.4em] cursor-pointer">Signature Masterpiece Protocol</label>
+              </div>
+              <div className="flex items-center gap-4 pt-6">
+                <input 
+                  name="isSpecial" 
+                  type="checkbox" 
+                  id="isSpecial"
+                  checked={formIsSpecial}
+                  onChange={(e) => setFormIsSpecial(e.target.checked)}
+                  className="w-4 h-4 rounded-sm border-outline/20 text-primary focus:ring-brand-accent/20 transition-all cursor-pointer" 
+                />
+                <label htmlFor="isSpecial" className="font-black text-primary/60 text-[8px] uppercase tracking-[0.4em] cursor-pointer">Special (Home Page Only)</label>
               </div>
               
               <div className="md:col-span-2 space-y-8">

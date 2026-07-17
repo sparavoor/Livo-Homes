@@ -36,8 +36,8 @@ export interface SiteSettings {
 export interface Product {
   id: string;
   name: string;
-  category: string;
-  subcategory?: string;
+  category?: string | null;
+  subcategory?: string | null;
   price: number;
   originalPrice?: number;
   description: string;
@@ -47,6 +47,7 @@ export interface Product {
   isNew?: boolean;
   isBestseller?: boolean;
   isSignatureMasterpiece: boolean;
+  isSpecial?: boolean;
   createdAt: string;
   material?: string;
   color?: string;
@@ -86,6 +87,7 @@ function mapDbProduct(p: any): Product {
     isNew: p.is_new,
     isBestseller: p.is_bestseller,
     isSignatureMasterpiece: p.is_signature_masterpiece,
+    isSpecial: !!p.is_special,
     createdAt: p.created_at,
     material: p.material,
     color: p.color,
@@ -128,6 +130,7 @@ export async function getProducts(page: number = 1, limit?: number): Promise<Pro
       originalPrice: p.originalPrice ? Number(p.originalPrice) : undefined,
       images: p.images || [p.image],
       availability: p.availability || (p.stock > 0 ? 'In Stock' : 'Sold Out'),
+      isSpecial: !!p.isSpecial,
     }));
   } catch (error) {
     console.error('Error reading products:', error);
@@ -142,6 +145,7 @@ export async function getSignatureMasterpieces(limit: number = 4): Promise<Produ
       .from('products')
       .select('*')
       .eq('is_signature_masterpiece', true)
+      .neq('is_special', true)
       .order('created_at', { ascending: false })
       .limit(limit);
 
@@ -149,7 +153,7 @@ export async function getSignatureMasterpieces(limit: number = 4): Promise<Produ
     return (data || []).map(mapDbProduct);
   }
   const products = await getProducts();
-  return products.filter(p => p.isSignatureMasterpiece).slice(0, limit);
+  return products.filter(p => p.isSignatureMasterpiece && !p.isSpecial).slice(0, limit);
 }
 
 export async function getRecentProducts(limit: number = 8): Promise<Product[]> {
@@ -157,6 +161,7 @@ export async function getRecentProducts(limit: number = 8): Promise<Product[]> {
     const { data, error } = await supabaseAdmin
       .from('products')
       .select('*')
+      .neq('is_special', true)
       .order('created_at', { ascending: false })
       .limit(limit);
 
@@ -164,7 +169,23 @@ export async function getRecentProducts(limit: number = 8): Promise<Product[]> {
     return (data || []).map(mapDbProduct);
   }
   const products = await getProducts();
-  return products.slice(0, limit);
+  return products.filter(p => !p.isSpecial).slice(0, limit);
+}
+
+export async function getSpecialProducts(limit: number = 8): Promise<Product[]> {
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from('products')
+      .select('*')
+      .eq('is_special', true)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return (data || []).map(mapDbProduct);
+  }
+  const products = await getProducts();
+  return products.filter(p => p.isSpecial).slice(0, limit);
 }
 
 export async function saveProducts(products: Product[]): Promise<void> {
@@ -182,7 +203,7 @@ export async function addProduct(product: Omit<Product, 'id' | 'createdAt'>): Pr
         .from('products')
         .insert({
           name: product.name,
-          category: product.category,
+          category: product.category || null,
           price: product.price,
           original_price: product.originalPrice,
           description: product.description,
@@ -192,10 +213,11 @@ export async function addProduct(product: Omit<Product, 'id' | 'createdAt'>): Pr
           is_new: product.isNew ?? true,
           is_bestseller: product.isBestseller ?? false,
           is_signature_masterpiece: product.isSignatureMasterpiece ?? false,
+          is_special: product.isSpecial ?? false,
           material: product.material,
           color: product.color,
           size: product.size,
-          subcategory: product.subcategory,
+          subcategory: product.subcategory || null,
           availability: product.availability || (product.stock > 0 ? 'In Stock' : 'Sold Out'),
         })
         .select()
@@ -211,9 +233,10 @@ export async function addProduct(product: Omit<Product, 'id' | 'createdAt'>): Pr
   const products = await getProducts();
   const newProduct: Product = {
     ...product,
-    id: Math.random().toString(36).substr(2, 9),
-    isSignatureMasterpiece: product.isSignatureMasterpiece ?? false,
+    id: Math.random().toString(36).substring(2, 11),
     createdAt: new Date().toISOString(),
+    isSignatureMasterpiece: product.isSignatureMasterpiece ?? false,
+    isSpecial: product.isSpecial ?? false,
     images: product.images || [product.image],
     availability: product.availability || (product.stock > 0 ? 'In Stock' : 'Sold Out'),
   };
@@ -229,11 +252,15 @@ export async function updateProduct(id: string, updates: Partial<Product>): Prom
     if (updates.isNew !== undefined) dbUpdates.is_new = updates.isNew;
     if (updates.isBestseller !== undefined) dbUpdates.is_bestseller = updates.isBestseller;
     if (updates.isSignatureMasterpiece !== undefined) dbUpdates.is_signature_masterpiece = updates.isSignatureMasterpiece;
+    if (updates.isSpecial !== undefined) dbUpdates.is_special = updates.isSpecial;
+    if (updates.category !== undefined) dbUpdates.category = updates.category || null;
+    if (updates.subcategory !== undefined) dbUpdates.subcategory = updates.subcategory || null;
 
     delete dbUpdates.originalPrice;
     delete dbUpdates.isNew;
     delete dbUpdates.isBestseller;
     delete dbUpdates.isSignatureMasterpiece;
+    delete dbUpdates.isSpecial;
     delete dbUpdates.createdAt;
     delete dbUpdates.id;
 

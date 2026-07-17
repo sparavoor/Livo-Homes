@@ -19,9 +19,11 @@ export default async function ProductsPage({
   
   const filteredProducts = isSearching 
     ? allProducts.filter(p => 
-        p.name.toLowerCase().includes(searchQuery!.toLowerCase()) || 
-        p.description.toLowerCase().includes(searchQuery!.toLowerCase()) ||
-        p.category.toLowerCase().includes(searchQuery!.toLowerCase())
+        !p.isSpecial && (
+          p.name.toLowerCase().includes(searchQuery!.toLowerCase()) || 
+          p.description.toLowerCase().includes(searchQuery!.toLowerCase()) ||
+          (p.category && p.category.toLowerCase().includes(searchQuery!.toLowerCase()))
+        )
       )
     : [];
 

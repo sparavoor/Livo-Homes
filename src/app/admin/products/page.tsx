@@ -16,6 +16,7 @@ export default function AdminProducts() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [formSelectedCategory, setFormSelectedCategory] = useState('');
+  const [formIsSpecial, setFormIsSpecial] = useState(false);
   const [imagesToKeep, setImagesToKeep] = useState<string[]>([]);
   const [previewImages, setPreviewImages] = useState<string[]>([]);
 
@@ -71,6 +72,7 @@ export default function AdminProducts() {
       setPreviewImages([]);
       setImagesToKeep([]);
       setFormSelectedCategory('');
+      setFormIsSpecial(false);
       setActiveTab('list');
     } catch (error) {
       console.error('Failed to save product:', error);
@@ -80,7 +82,8 @@ export default function AdminProducts() {
 
   function handleEdit(product: Product) {
     setEditingProduct(product);
-    setFormSelectedCategory(product.category);
+    setFormSelectedCategory(product.category || '');
+    setFormIsSpecial(!!product.isSpecial);
     setImagesToKeep(product.images || [product.image]);
     setPreviewImages([]);
     setActiveTab('add');
@@ -127,7 +130,7 @@ export default function AdminProducts() {
             Catalogue
           </button>
           <button 
-            onClick={() => { setEditingProduct(null); setImagesToKeep([]); setPreviewImages([]); setFormSelectedCategory(''); setActiveTab('add'); }} 
+            onClick={() => { setEditingProduct(null); setImagesToKeep([]); setPreviewImages([]); setFormSelectedCategory(''); setFormIsSpecial(false); setActiveTab('add'); }} 
             className={`px-6 py-3 rounded-lg font-bold text-xs uppercase tracking-widest transition-all ${activeTab === 'add' ? 'bg-white text-primary shadow-md scale-[1.02]' : 'text-secondary hover:text-primary'}`}
           >
             Register New
@@ -195,7 +198,7 @@ export default function AdminProducts() {
                     <td className="p-6">
                       <div className="flex flex-col gap-1">
                         <span className="px-3 py-1 bg-surface-container-low text-secondary border border-outline-variant/20 rounded-full text-[10px] font-bold uppercase tracking-wider w-fit">
-                          {product.category}
+                          {product.isSpecial ? 'Special Product' : (product.category || 'None')}
                         </span>
                         {product.subcategory && (
                           <span className="px-3 py-0.5 bg-primary/5 text-primary/70 border border-primary/10 rounded-full text-[8px] font-bold uppercase tracking-wider w-fit ml-2">
@@ -212,6 +215,7 @@ export default function AdminProducts() {
                         </span>
                         {product.isNew && <span className="bg-brand-accent/10 text-brand-accent px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest w-fit">New Arrival</span>}
                         {product.isSignatureMasterpiece && <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest w-fit border border-amber-200">Signature</span>}
+                        {product.isSpecial && <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest w-fit border border-purple-200">Special</span>}
                       </div>
                     </td>
                     <td className="p-6 text-right space-x-6">
@@ -237,7 +241,7 @@ export default function AdminProducts() {
             </h2>
             {editingProduct && (
               <button 
-                onClick={() => { setEditingProduct(null); setImagesToKeep([]); setPreviewImages([]); setFormSelectedCategory(''); setActiveTab('list'); }}
+                onClick={() => { setEditingProduct(null); setImagesToKeep([]); setPreviewImages([]); setFormSelectedCategory(''); setFormIsSpecial(false); setActiveTab('list'); }}
                 className="text-secondary hover:text-primary text-xs font-bold uppercase tracking-widest flex items-center gap-2"
               >
                 <span className="material-symbols-outlined text-sm">close</span>
@@ -251,13 +255,16 @@ export default function AdminProducts() {
               <input name="name" required type="text" defaultValue={editingProduct?.name} placeholder="e.g. Helios Matte Monochrome" className="w-full bg-surface-container-low border border-outline-variant/30 focus:ring-2 focus:ring-primary/20 focus:border-primary rounded-xl px-5 py-4 text-sm font-medium transition-all" />
             </div>
             <div>
-              <label className="block font-bold text-primary text-[0.65rem] uppercase tracking-[0.2em] mb-3">Collection</label>
+              <label className="block font-bold text-primary text-[0.65rem] uppercase tracking-[0.2em] mb-3">
+                Collection {formIsSpecial ? '(Optional)' : '(Required)'}
+              </label>
               <select 
                 name="category" 
-                required 
-                value={formSelectedCategory}
+                required={!formIsSpecial} 
+                disabled={formIsSpecial}
+                value={formIsSpecial ? '' : formSelectedCategory}
                 onChange={(e) => setFormSelectedCategory(e.target.value)}
-                className="w-full bg-surface-container-low border border-outline-variant/30 focus:ring-2 focus:ring-primary/20 focus:border-primary rounded-xl px-5 py-4 text-sm font-bold appearance-none transition-all cursor-pointer"
+                className="w-full bg-surface-container-low border border-outline-variant/30 focus:ring-2 focus:ring-primary/20 focus:border-primary rounded-xl px-5 py-4 text-sm font-bold appearance-none transition-all cursor-pointer disabled:opacity-50"
               >
                 <option value="">Select Collection</option>
                 {categories.map((cat: Category) => (
@@ -269,7 +276,7 @@ export default function AdminProducts() {
               <label className="block font-bold text-primary text-[0.65rem] uppercase tracking-[0.2em] mb-3">Sub-Collection</label>
               <select 
                 name="subcategory" 
-                defaultValue={editingProduct?.subcategory}
+                defaultValue={editingProduct?.subcategory || ''}
                 className="w-full bg-surface-container-low border border-outline-variant/30 focus:ring-2 focus:ring-primary/20 focus:border-primary rounded-xl px-5 py-4 text-sm font-bold appearance-none transition-all cursor-pointer"
                 disabled={!formSelectedCategory}
               >
@@ -311,6 +318,17 @@ export default function AdminProducts() {
                 className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20 transition-all pointer-events-auto cursor-pointer" 
               />
               <label htmlFor="isSignatureMasterpiece" className="font-bold text-primary text-[0.65rem] uppercase tracking-[0.2em] cursor-pointer">Signature Masterpiece</label>
+            </div>
+            <div className="flex items-center gap-4 h-full pt-6">
+              <input 
+                name="isSpecial" 
+                type="checkbox" 
+                id="isSpecial"
+                checked={formIsSpecial}
+                onChange={(e) => setFormIsSpecial(e.target.checked)}
+                className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20 transition-all pointer-events-auto cursor-pointer" 
+              />
+              <label htmlFor="isSpecial" className="font-bold text-primary text-[0.65rem] uppercase tracking-[0.2em] cursor-pointer">Special (Home Page Only)</label>
             </div>
             <div>
               <label className="block font-bold text-primary text-[0.65rem] uppercase tracking-[0.2em] mb-3">Retail Price (₹)</label>
