@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS products (
   is_special BOOLEAN NOT NULL DEFAULT false,
   material TEXT,
   color TEXT,
+  finish TEXT,
   size TEXT,
   availability TEXT DEFAULT 'In Stock' CHECK (availability IN ('In Stock', 'Sold Out')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL

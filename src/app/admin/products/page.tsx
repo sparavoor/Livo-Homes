@@ -298,8 +298,12 @@ export default function AdminProducts() {
               <input name="material" defaultValue={editingProduct?.material} placeholder="e.g. Lead-free Brass" className="w-full bg-surface-container-low border border-outline-variant/30 focus:ring-2 focus:ring-primary/20 focus:border-primary rounded-xl px-5 py-4 text-sm font-medium transition-all" />
             </div>
             <div>
-              <label className="block font-bold text-primary text-[0.65rem] uppercase tracking-[0.2em] mb-3">Color / Finish</label>
-              <input name="color" defaultValue={editingProduct?.color} placeholder="e.g. Obsidian Black" className="w-full bg-surface-container-low border border-outline-variant/30 focus:ring-2 focus:ring-primary/20 focus:border-primary rounded-xl px-5 py-4 text-sm font-medium transition-all" />
+              <label className="block font-bold text-primary text-[0.65rem] uppercase tracking-[0.2em] mb-3">Color</label>
+              <input name="color" defaultValue={editingProduct?.color} placeholder="e.g. Matte Black, Rose Gold" className="w-full bg-surface-container-low border border-outline-variant/30 focus:ring-2 focus:ring-primary/20 focus:border-primary rounded-xl px-5 py-4 text-sm font-medium transition-all" />
+            </div>
+            <div>
+              <label className="block font-bold text-primary text-[0.65rem] uppercase tracking-[0.2em] mb-3">Finish</label>
+              <input name="finish" defaultValue={editingProduct?.finish || ''} placeholder="e.g. Brushed, PVD Coated" className="w-full bg-surface-container-low border border-outline-variant/30 focus:ring-2 focus:ring-primary/20 focus:border-primary rounded-xl px-5 py-4 text-sm font-medium transition-all" />
             </div>
             <div>
               <label className="block font-bold text-primary text-[0.65rem] uppercase tracking-[0.2em] mb-3">Physical Size</label>

@@ -51,6 +51,7 @@ export interface Product {
   createdAt: string;
   material?: string;
   color?: string;
+  finish?: string | null;
   size?: string;
   availability: 'In Stock' | 'Sold Out';
 }
@@ -91,6 +92,7 @@ function mapDbProduct(p: any): Product {
     createdAt: p.created_at,
     material: p.material,
     color: p.color,
+    finish: p.finish,
     size: p.size,
     availability: p.availability,
   };
@@ -131,6 +133,7 @@ export async function getProducts(page: number = 1, limit?: number): Promise<Pro
       images: p.images || [p.image],
       availability: p.availability || (p.stock > 0 ? 'In Stock' : 'Sold Out'),
       isSpecial: !!p.isSpecial,
+      finish: p.finish,
     }));
   } catch (error) {
     console.error('Error reading products:', error);
@@ -216,6 +219,7 @@ export async function addProduct(product: Omit<Product, 'id' | 'createdAt'>): Pr
           is_special: product.isSpecial ?? false,
           material: product.material,
           color: product.color,
+          finish: product.finish || null,
           size: product.size,
           subcategory: product.subcategory || null,
           availability: product.availability || (product.stock > 0 ? 'In Stock' : 'Sold Out'),
@@ -237,6 +241,7 @@ export async function addProduct(product: Omit<Product, 'id' | 'createdAt'>): Pr
     createdAt: new Date().toISOString(),
     isSignatureMasterpiece: product.isSignatureMasterpiece ?? false,
     isSpecial: product.isSpecial ?? false,
+    finish: product.finish || null,
     images: product.images || [product.image],
     availability: product.availability || (product.stock > 0 ? 'In Stock' : 'Sold Out'),
   };

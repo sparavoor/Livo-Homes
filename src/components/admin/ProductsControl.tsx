@@ -279,8 +279,12 @@ export default function ProductsControl() {
                 <input name="material" defaultValue={editingProduct?.material} placeholder="e.g. Lead-free Brass" className="w-full bg-background border border-outline/5 focus:ring-1 focus:ring-brand-accent/20 focus:border-brand-accent/40 rounded-sm px-5 py-4 text-xs font-bold transition-all outline-none" />
               </div>
               <div>
-                <label className="block font-black text-primary/40 text-[8px] uppercase tracking-[0.4em] mb-4">Color Palette / Finish</label>
-                <input name="color" defaultValue={editingProduct?.color} placeholder="e.g. Obsidian Black" className="w-full bg-background border border-outline/5 focus:ring-1 focus:ring-brand-accent/20 focus:border-brand-accent/40 rounded-sm px-5 py-4 text-xs font-bold transition-all outline-none" />
+                <label className="block font-black text-primary/40 text-[8px] uppercase tracking-[0.4em] mb-4">Color Palette</label>
+                <input name="color" defaultValue={editingProduct?.color} placeholder="e.g. Matte Black, Rose Gold" className="w-full bg-background border border-outline/5 focus:ring-1 focus:ring-brand-accent/20 focus:border-brand-accent/40 rounded-sm px-5 py-4 text-xs font-bold transition-all outline-none" />
+              </div>
+              <div>
+                <label className="block font-black text-primary/40 text-[8px] uppercase tracking-[0.4em] mb-4">Surface Finish</label>
+                <input name="finish" defaultValue={editingProduct?.finish || ''} placeholder="e.g. Brushed, PVD Coated" className="w-full bg-background border border-outline/5 focus:ring-1 focus:ring-brand-accent/20 focus:border-brand-accent/40 rounded-sm px-5 py-4 text-xs font-bold transition-all outline-none" />
               </div>
               <div>
                 <label className="block font-black text-primary/40 text-[8px] uppercase tracking-[0.4em] mb-4">Dimensional Scale</label>

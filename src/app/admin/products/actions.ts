@@ -16,6 +16,7 @@ export async function createProductAction(formData: FormData) {
   const isSpecial = formData.get('isSpecial') === 'on';
   const material = formData.get('material') as string;
   const color = formData.get('color') as string;
+  const finish = formData.get('finish') as string;
   const size = formData.get('size') as string;
   const availability = formData.get('availability') as 'In Stock' | 'Sold Out';
 
@@ -42,6 +43,7 @@ export async function createProductAction(formData: FormData) {
     isSpecial,
     material,
     color,
+    finish,
     size,
     availability,
   });
@@ -63,6 +65,7 @@ export async function updateProductAction(id: string, formData: FormData) {
   const isSpecial = formData.get('isSpecial') === 'on';
   const material = formData.get('material') as string;
   const color = formData.get('color') as string;
+  const finish = formData.get('finish') as string;
   const size = formData.get('size') as string;
   const availability = formData.get('availability') as 'In Stock' | 'Sold Out';
 
@@ -95,6 +98,7 @@ export async function updateProductAction(id: string, formData: FormData) {
     isSpecial,
     material,
     color,
+    finish,
     size,
     availability,
   });

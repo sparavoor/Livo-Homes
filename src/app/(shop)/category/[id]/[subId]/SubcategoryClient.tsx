@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { Product, Subcategory, Category } from '@/lib/db';
-import { MATERIALS } from '@/data/products';
 import { useCart } from '@/context/CartContext';
 
 interface SubcategoryClientProps {
@@ -13,11 +12,43 @@ interface SubcategoryClientProps {
 }
 
 export default function SubcategoryClient({ initialProducts, categoryDetail, subcategoryDetail }: SubcategoryClientProps) {
-  const [maxPrice, setMaxPrice] = useState<number>(100000);
+  const maxProductPrice = useMemo(() => {
+    if (initialProducts.length === 0) return 10000;
+    return Math.max(...initialProducts.map(p => p.price), 1000);
+  }, [initialProducts]);
+
+  const [maxPrice, setMaxPrice] = useState<number>(maxProductPrice);
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [selectedFinish, setSelectedFinish] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<string>("Newest Arrivals");
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
   const { addItem } = useCart();
+
+  useEffect(() => {
+    setMaxPrice(maxProductPrice);
+  }, [maxProductPrice]);
+
+  const uniqueMaterials = useMemo(() => {
+    const mats = initialProducts
+      .map(p => p.material)
+      .filter((m): m is string => !!m);
+    return Array.from(new Set(mats));
+  }, [initialProducts]);
+
+  const uniqueColors = useMemo(() => {
+    const cols = initialProducts
+      .map(p => p.color)
+      .filter((c): c is string => !!c);
+    return Array.from(new Set(cols));
+  }, [initialProducts]);
+
+  const uniqueFinishes = useMemo(() => {
+    const fins = initialProducts
+      .map(p => p.finish)
+      .filter((f): f is string => !!f);
+    return Array.from(new Set(fins));
+  }, [initialProducts]);
 
   const filteredProducts = useMemo(() => {
     let result = [...initialProducts];
@@ -27,10 +58,17 @@ export default function SubcategoryClient({ initialProducts, categoryDetail, sub
 
     // Material Filter
     if (selectedMaterial) {
-      result = result.filter(p => 
-        p.description?.toLowerCase().includes(selectedMaterial.toLowerCase()) ||
-        (p as any).material?.toLowerCase() === selectedMaterial.toLowerCase()
-      );
+      result = result.filter(p => p.material?.toLowerCase() === selectedMaterial.toLowerCase());
+    }
+
+    // Color Filter
+    if (selectedColor) {
+      result = result.filter(p => p.color?.toLowerCase() === selectedColor.toLowerCase());
+    }
+
+    // Finish Filter
+    if (selectedFinish) {
+      result = result.filter(p => p.finish?.toLowerCase() === selectedFinish.toLowerCase());
     }
 
     // Sorting
@@ -44,13 +82,31 @@ export default function SubcategoryClient({ initialProducts, categoryDetail, sub
       case "Popularity":
         result.sort((a, b) => (b.isBestseller ? 1 : 0) - (a.isBestseller ? 1 : 0));
         break;
+      case "Material: A to Z":
+        result.sort((a, b) => (a.material || "").localeCompare(b.material || ""));
+        break;
+      case "Material: Z to A":
+        result.sort((a, b) => (b.material || "").localeCompare(a.material || ""));
+        break;
+      case "Color: A to Z":
+        result.sort((a, b) => (a.color || "").localeCompare(b.color || ""));
+        break;
+      case "Color: Z to A":
+        result.sort((a, b) => (b.color || "").localeCompare(a.color || ""));
+        break;
+      case "Finish: A to Z":
+        result.sort((a, b) => (a.finish || "").localeCompare(b.finish || ""));
+        break;
+      case "Finish: Z to A":
+        result.sort((a, b) => (b.finish || "").localeCompare(a.finish || ""));
+        break;
       default:
         result.sort((a, b) => b.id.localeCompare(a.id));
         break;
     }
 
     return result;
-  }, [initialProducts, maxPrice, selectedMaterial, sortBy]);
+  }, [initialProducts, maxPrice, selectedMaterial, selectedColor, selectedFinish, sortBy]);
 
   const handleAddToCart = (product: Product) => {
     setAddingToCart(product.id);
@@ -94,6 +150,12 @@ export default function SubcategoryClient({ initialProducts, categoryDetail, sub
                 <option>Price: Low to High</option>
                 <option>Price: High to Low</option>
                 <option>Popularity</option>
+                <option>Material: A to Z</option>
+                <option>Material: Z to A</option>
+                <option>Color: A to Z</option>
+                <option>Color: Z to A</option>
+                <option>Finish: A to Z</option>
+                <option>Finish: Z to A</option>
               </select>
               <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-secondary">expand_more</span>
             </div>
@@ -112,38 +174,84 @@ export default function SubcategoryClient({ initialProducts, categoryDetail, sub
                 <input 
                   type="range"
                   min="0"
-                  max="500000"
-                  step="1000"
+                  max={maxProductPrice}
+                  step="50"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(parseInt(e.target.value))}
                   className="w-full h-1.5 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-brand-accent" 
                 />
                 <div className="flex justify-between mt-4">
                   <div className="bg-surface-container-low px-4 py-2 rounded-md text-xs font-mono font-medium text-secondary">₹0</div>
-                  <div className="bg-surface-container-low px-4 py-2 rounded-md text-xs font-mono font-medium text-secondary">₹{maxPrice.toLocaleString()}{maxPrice >= 500000 ? '+' : ''}</div>
+                  <div className="bg-surface-container-low px-4 py-2 rounded-md text-xs font-mono font-medium text-secondary">₹{maxPrice.toLocaleString()}{maxPrice >= maxProductPrice ? '+' : ''}</div>
                 </div>
               </div>
             </section>
 
             {/* Material Filter */}
-            <section>
-              <h3 className="font-headline text-lg text-primary font-bold mb-6">Material</h3>
-              <div className="flex flex-wrap gap-2">
-                {MATERIALS.map(mat => (
-                  <button 
-                    key={mat}
-                    onClick={() => setSelectedMaterial(selectedMaterial === mat ? null : mat)}
-                    className={`px-4 py-2 rounded-full border transition-all text-xs font-medium ${
-                      selectedMaterial === mat 
-                        ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' 
-                        : 'border-outline-variant/30 text-secondary hover:border-brand-accent hover:text-brand-accent'
-                    }`}
-                  >
-                    {mat}
-                  </button>
-                ))}
-              </div>
-            </section>
+            {uniqueMaterials.length > 0 && (
+              <section>
+                <h3 className="font-headline text-lg text-primary font-bold mb-6">Material</h3>
+                <div className="flex flex-wrap gap-2">
+                  {uniqueMaterials.map(mat => (
+                    <button 
+                      key={mat}
+                      onClick={() => setSelectedMaterial(selectedMaterial === mat ? null : mat)}
+                      className={`px-4 py-2 rounded-full border transition-all text-xs font-medium ${
+                        selectedMaterial === mat 
+                          ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' 
+                          : 'border-outline-variant/30 text-secondary hover:border-brand-accent hover:text-brand-accent'
+                      }`}
+                    >
+                      {mat}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Color Filter */}
+            {uniqueColors.length > 0 && (
+              <section>
+                <h3 className="font-headline text-lg text-primary font-bold mb-6">Color</h3>
+                <div className="flex flex-wrap gap-2">
+                  {uniqueColors.map(col => (
+                    <button 
+                      key={col}
+                      onClick={() => setSelectedColor(selectedColor === col ? null : col)}
+                      className={`px-4 py-2 rounded-full border transition-all text-xs font-medium ${
+                        selectedColor === col 
+                          ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' 
+                          : 'border-outline-variant/30 text-secondary hover:border-brand-accent hover:text-brand-accent'
+                      }`}
+                    >
+                      {col}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Finish Filter */}
+            {uniqueFinishes.length > 0 && (
+              <section>
+                <h3 className="font-headline text-lg text-primary font-bold mb-6">Finish</h3>
+                <div className="flex flex-wrap gap-2">
+                  {uniqueFinishes.map(fin => (
+                    <button 
+                      key={fin}
+                      onClick={() => setSelectedFinish(selectedFinish === fin ? null : fin)}
+                      className={`px-4 py-2 rounded-full border transition-all text-xs font-medium ${
+                        selectedFinish === fin 
+                          ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' 
+                          : 'border-outline-variant/30 text-secondary hover:border-brand-accent hover:text-brand-accent'
+                      }`}
+                    >
+                      {fin}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Sidebar Banners */}
             <div className="bg-primary/5 rounded-xl p-6 border border-primary/10">
@@ -216,8 +324,10 @@ export default function SubcategoryClient({ initialProducts, categoryDetail, sub
               <p className="text-secondary mt-2">No items match your filters in this sub-collection.</p>
               <button 
                 onClick={() => {
-                  setMaxPrice(500000);
+                  setMaxPrice(maxProductPrice);
                   setSelectedMaterial(null);
+                  setSelectedColor(null);
+                  setSelectedFinish(null);
                 }}
                 className="mt-6 text-brand-accent font-bold hover:underline"
               >

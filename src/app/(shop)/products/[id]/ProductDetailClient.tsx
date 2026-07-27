@@ -129,8 +129,12 @@ export default function ProductDetailClient({ product, relatedProducts, categori
                 <span className="text-base text-primary font-medium">{product.material || 'Architectural Alloy'}</span>
               </div>
               <div className="py-4 flex justify-between items-center group">
+                <span className="text-sm text-secondary uppercase tracking-widest group-hover:text-primary transition-colors">Color</span>
+                <span className="text-base text-primary font-medium">{product.color || 'Signature Hue'}</span>
+              </div>
+              <div className="py-4 flex justify-between items-center group">
                 <span className="text-sm text-secondary uppercase tracking-widest group-hover:text-primary transition-colors">Finish</span>
-                <span className="text-base text-primary font-medium">{product.color || 'Signature Palette'}</span>
+                <span className="text-base text-primary font-medium">{product.finish || 'Standard Finish'}</span>
               </div>
               <div className="py-4 flex justify-between items-center group">
                 <span className="text-sm text-secondary uppercase tracking-widest group-hover:text-primary transition-colors">Dimensions</span>
